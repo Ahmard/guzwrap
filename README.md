@@ -66,5 +66,5 @@ Request::get($url)
         $wrp->onRedirect(function(){
             echo "Redirection detected!";
         });
-    });
+    })->exec();
 ```
