@@ -19,7 +19,7 @@ trait Cookie
     /**
      * Use cookie provided by guzzle
      * @param void
-     * @return Queliwrap\Client
+     * @return Guzwrap\Request
      */
     public function withCookie($jar = null)
     {
@@ -34,7 +34,7 @@ trait Cookie
     /**
      * Send request with cookie from file and stored to file
      * @param string 'fileloc/filename'
-     * @return Queliwrap\Client
+     * @return Guzwrap\Request
      */
     public function withCookieFile(string $file)
     {
@@ -46,8 +46,8 @@ trait Cookie
     
     /**
      * Send request with cookie session
-     * @param void
-     * @return Queliwrap\Client
+     * @param string $name 
+     * @return Guzwrap\Request
      */
     public function withCookieSession($name)
     {
@@ -60,7 +60,7 @@ trait Cookie
     /**
      * If user have cookie in hand
      * @param array cookie list
-     * @return Queliwrap\Client
+     * @return Guzwrap\Request
      */
     public function withCookieArray(array $cookies)
     {
