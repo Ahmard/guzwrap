@@ -39,7 +39,7 @@ Request::get($url)
     ->exec();
 ```
 
-Let's try sending request with cookies
+- Request with cookies
 ```php
 Request::get($url)
     ->withCookie()
@@ -54,7 +54,7 @@ Request::get($url)
     ])->exec();
 ```
 
-Handle redirects
+- Handle redirects
 ```php
 Request::get($url)
     ->redirects(function($wrp){
@@ -67,4 +67,41 @@ Request::get($url)
             echo "Redirection detected!";
         });
     })->exec();
+```
+
+- Headers
+```php
+Request::get($url)->header(function($h){
+    $h->add('hello', 'world');
+    $h->add('planet', 'earth');
+})->exec();
+```
+
+- Query
+```php
+Request::get('https://google.com')
+    ->query('q', 'Who is jane doe')
+    ->exec();
+```
+
+- Post form data
+```php
+Request::url($url)->post(function($req){
+    $req->field('first_name', 'Jane');
+    $req->field('last_name', 'Doe');
+})->exec();
+//Post with multipart data
+Request::url($url)->post(function($req){
+    $req->field('full_name', 'Jane Doe');
+    $req->file('avatar', 'C:\jane_doe.jpg');
+})->exec();
+//Alter file data
+Request::url($url)->post(function($req){
+    $req->field('full_name', 'Jane Doe');
+    $req->file(function(){
+        $file->field('avatar');
+        $file->path('C:\jane_doe.jpg');
+        $file->name('John_doe.gif');
+    });
+})->exec();
 ```

@@ -3,15 +3,17 @@ namespace Guzwrap;
 
 use Guzwrap\SubClasses\Redirect;
 use Guzwrap\SubClasses\Cookie;
+use Guzwrap\SubClasses\Header;
+use Guzwrap\SubClasses\Post;
 use Guzwrap\SubClasses\RequestMethods;
 use Psr\Http\Message\StreamInterface;
 use GuzzleHttp\Client;
 
 class TheWrapper
 {
-    //use Cookie triat
+    //Import cookie handler
     use Cookie;
-    //use RequestMethods trait
+    //Import requests methods
     use RequestMethods;
     
     
@@ -19,12 +21,19 @@ class TheWrapper
      * Guzzle request options
      * @var array
      */
-    public $options = array();
+    protected $options = array();
     
+    protected $oneTimedOption = array();
     
     
     public function addOption($name, $value)
     {
+        if(is_array($value)){
+            $value = array_merge(
+                ($this->options[$name] ?? []),
+                $value
+            );
+        }
         $this->options = array_merge(
             $this->options, 
             [$name => $value]
@@ -33,13 +42,30 @@ class TheWrapper
     }
     
     
-    public function request($type, $url, $options=array())
+    public function request($type, ...$argsOrClosure)
     {
+        if($type == 'POST'){
+            if(gettype($argsOrClosure[0]) == 'object'){
+                $post = new Post();
+                $argsOrClosure[0]($post);
+                //let the $argsOrClosure hold the retrieved options
+                $argsOrClosure = $post->getOptions();
+                //If url from post method is used
+                if(isset($argsOrClosure['url'])){
+                    $this->url = $argsOrClosure['url'];
+                }
+            }
+        }
+        
+        //lets check if its one timed options are provided
+        if(isset($argsOrClosure[1])){
+            $this->oneTimedOption = $argsOrClosure[1];
+        }
+        
         $this->requestType = $type;
-        $this->url = $url;
         $this->options = array_merge(
             $this->options, 
-            $options
+            ($argsOrClosure ?? [])
         );
         
         return $this;
@@ -53,8 +79,43 @@ class TheWrapper
      */
     public function exec()
     {
-        $client = new Client();
-        return $client->request($this->requestType, $this->url, $this->options);
+        $options = array_merge(
+            $this->options,
+            $this->getCookieOptions()
+        );
+        
+        $url = $options[0] ?? $this->url;
+       // unset($options[0]);
+        
+        /**
+         * Let's check if the request has file
+         * If there is file, we will merge form_params with multipart
+         */
+        $formParams = $options['form_params'];
+        
+        if(isset($options['multipart']) && isset($formParams)){
+            $keys = array_keys($formParams);
+            
+            for ($i=0; $i<count($formParams); $i++){
+                $options['multipart'][] = [
+                    'name' => $keys[$i],
+                    'contents' => $formParams[$keys[$i]]
+                ];
+            }
+            
+            unset($options['form_params'], $formParams);
+        }
+        
+        $client = new Client($options);
+        //dd($options);
+        return $client->request($this->requestType, $url, $this->oneTimedOption);
+    }
+    
+    
+    public function url(string $url)
+    {
+        $this->url = $url;
+        return $this;
     }
     
     
@@ -156,9 +217,25 @@ class TheWrapper
     }
     
     
-    public function headers(array $headerLists)
+    public function header($headersOrKeyOrClosure, $value = null)
     {
-        return $this->addOption('headers', $headerLists);
+        $firstParamType = gettype($headersOrKeyOrClosure);
+        
+        switch($firstParamType){
+            case 'object':
+                $headerObj = new Header();
+                $headersOrKeyOrClosure($headerObj);
+                $options = array_merge(($this->options['headers'] ?? []), $headerObj->getOptions());
+                break;
+            case 'array':
+                $options = $headersOrKeyOrClosure;
+                break;
+            case 'string':
+                $options[$headersOrKeyOrClosure] = $value;
+                break;
+        }
+        
+        return $this->addOption('headers', $options);
     }
     
     

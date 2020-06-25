@@ -62,16 +62,19 @@ trait Cookie
      * @param array cookie list
      * @return Guzwrap\Request
      */
-    public function withCookieArray(array $cookies)
+    public function withCookieArray(array $cookies, string $domain)
     {
-        $jar = CookieJar::fromArray($cookies);
+        $jar = CookieJar::fromArray($cookies, $domain);
         $this->userCookieChoice = $jar;
         return $this;
     }
     
     
-    protected function getCookieRequestOptions()
+    protected function getCookieOptions()
     {
+        if($this->userCookieChoice == null){
+            return [];
+        }
         return ['cookies' => $this->userCookieChoice];
     }
 }

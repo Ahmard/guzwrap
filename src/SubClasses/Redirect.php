@@ -15,44 +15,45 @@ class Redirect
     
     public function max(int $value)
     {
-        return $this->options('max', $value);
+        return $this->setOption('max', $value);
     }
     
     
     public function strict($bool=true)
     {
-        return $this->options('strict', $bool);
+        return $this->setOption('strict', $bool);
     }
     
     
     public function referer($ref=true)
     {
-        return $this->options('referer', $ref);
+        return $this->setOption('referer', $ref);
     }
     
     
     public function protocols(...$protocols)
     {
-        return $this->options('protocols', $protocols);
+        return $this->setOption('protocols', $protocols);
     }
     
     
     public function onRedirect($callback)
     {
-        return $this->options('on_redirect', $callback);
+        return $this->setOption('on_redirect', $callback);
     }
     
     
     public function trackRedirect()
     {
-        return $this->options('track_redrects', true);
+        return $this->setOption('track_redrects', true);
     }
     
     
-    protected function getOptions()
+    public function getOptions()
     {
-        return [
-            'allow_redirects' => $this->options
-        ];
+        if(empty($this->options)){
+            return [];
+        }
+        return $this->options;
     }
 }

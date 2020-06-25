@@ -6,13 +6,13 @@ trait RequestMethods
     
     public function get(...$args)
     {
-        return $this->request('GET', $args);
+        return $this->request('GET', ...$args);
     }
     
     
     public function head(...$args)
     {
-        return $this->request(...$args);
+        return $this->request('HEAD', ...$args);
     }
     
     public function post(...$args)
@@ -27,7 +27,7 @@ trait RequestMethods
     
     public function delete(...$args)
     {
-        return $this->request('delete', ...$args);
+        return $this->request('DELETE', ...$args);
     }
     
     

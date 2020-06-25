@@ -3,11 +3,6 @@ namespace Guzwrap;
 
 class Request
 {
-    public function __construct()
-    {
-        
-    }
-    
     /**
      * handle first static call
      * @return Queliwrap\Client
