@@ -105,3 +105,19 @@ Request::url($url)->post(function($req){
     });
 })->exec();
 ```
+
+- UserAgent
+We provide custom useragents to help send request easily.
+```php
+Request::userAgent('chrome');
+//Choose specific useragent index from array
+Request::userAgent('chrome', '1');
+//Choose sub-useragent
+Request::userAgent('chrome', '9.1');
+```
+
+- List useragents
+```php
+use Guzwrap\UserAgent;
+$userAgents = (new UserAgent())->getAvailable();
+```

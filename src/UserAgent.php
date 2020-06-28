@@ -62,15 +62,28 @@ class UserAgent
             [$firstKey, $secondKey] = $expChosen;
         }
         
+        $totalAgents = count($userAgents) - 1;
+        
         //If no ua is chosen, get random
-        $chosenKey ??= $firstKey ?? rand(0, (count($userAgents) - 1));
+        $chosenKey ??= $firstKey ?? rand(0, $totalAgents);
+        //If chosen agent is greater than useragents list
+        //We use last user agent
+        if($chosenKey > $totalAgents){
+            $chosenKey = $totalAgents;
+        }
         
         //get ua
         $ua = $userAgents[$chosenKey];
-        
+       
         //If we got ourselves childs
         if(is_array($ua)){
-            $secondKey ??= rand(0, (count($ua) - 1));
+            $totalSubAgents = count($ua) - 1;
+            $secondKey ??= rand(0, $totalSubAgents);
+            //If chosen agent is greater than useragents list
+            //We use last user agent
+            if($secondKey > $totalSubAgents){
+                $secondKey = $totalSubAgents;
+            }
             $ua = $ua[$secondKey];
         }
         
