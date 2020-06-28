@@ -1,6 +1,8 @@
 <?php
 namespace Guzwrap;
 
+use Guzwrap\Classes\TheWrapper;
+
 class Request
 {
     /**

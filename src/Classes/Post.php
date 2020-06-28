@@ -1,8 +1,8 @@
 <?php
-namespace Guzwrap\SubClasses;
+namespace Guzwrap\Classes;
 
-use Guzwrap\SubClasses\File;
-use Guzwrap\SubClasses\Header;
+use Guzwrap\Classes\File;
+use Guzwrap\Classes\Header;
 
 class Post
 {

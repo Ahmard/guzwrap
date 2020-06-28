@@ -1,11 +1,12 @@
 <?php
-namespace Guzwrap;
+namespace Guzwrap\Classes;
 
-use Guzwrap\SubClasses\Redirect;
-use Guzwrap\SubClasses\Cookie;
-use Guzwrap\SubClasses\Header;
-use Guzwrap\SubClasses\Post;
-use Guzwrap\SubClasses\RequestMethods;
+use Guzwrap\Classes\Redirect;
+use Guzwrap\Classes\Cookie;
+use Guzwrap\Classes\Header;
+use Guzwrap\UserAgent;
+use Guzwrap\Classes\Post;
+use Guzwrap\Classes\RequestMethods;
 use Psr\Http\Message\StreamInterface;
 use GuzzleHttp\Client;
 
@@ -18,7 +19,7 @@ class TheWrapper
     
     
     /**
-     * Guzzle request options
+     * Guzzle request options 
      * @var array
      */
     protected $options = array();
@@ -115,6 +116,19 @@ class TheWrapper
     public function url(string $url)
     {
         $this->url = $url;
+        return $this;
+    }
+    
+    
+    public function userAgent($userAgent, $chosen = null)
+    {
+        if($chosen || strlen($userAgent) < 8){
+            $userAgent = (new UserAgent)->get($userAgent, $chosen);
+        }
+        $this->addOption('headers', array_merge(
+            $this->options['headers'],
+            ['user-agent' => $userAgent]
+        ));
         return $this;
     }
     

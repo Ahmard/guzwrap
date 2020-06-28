@@ -1,5 +1,5 @@
 <?php
-namespace Guzwrap\SubClasses;
+namespace Guzwrap\Classes;
 
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SessionCookieJar;

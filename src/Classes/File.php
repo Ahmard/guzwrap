@@ -1,7 +1,7 @@
 <?php
-namespace Guzwrap\SubClasses;
+namespace Guzwrap\Classes;
 
-use Guzwrap\SubClasses\Header;
+use Guzwrap\Classes\Header;
 
 class File
 {
@@ -57,7 +57,7 @@ class File
      * Set header
      * @param array|string|closure $headersOrKey
      * @param string $value
-     * @return Guzwrap\SubClasses\File
+     * @return Guzwrap\Classes\File
      */
     public function header($headersOrKeyOrClosure, $value = null)
     {

@@ -1,5 +1,5 @@
 <?php
-namespace Guzwrap\SubClasses;
+namespace Guzwrap\Classes;
 
 trait RequestMethods
 {
