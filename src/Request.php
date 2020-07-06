@@ -14,4 +14,13 @@ class Request
         return (new TheWrapper())->$method(...$args);
     }
     
+    /**
+     * Get the request wrapper instance
+     * @param void
+     * @return TheWrapper
+     */
+    public static function getInstance()
+    {
+        return new TheWrapper();
+    }
 }

@@ -39,6 +39,12 @@ Request::get($url)
     ->exec();
 ```
 
+- get Guzwrap Instance
+```php
+$instance = Request::getInstance();
+//Do something...
+```
+
 - Request with cookies
 ```php
 Request::get($url)
