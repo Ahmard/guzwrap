@@ -7,13 +7,15 @@ use GuzzleHttp\Cookie\FileCookieJar;
 
 trait Cookie
 {
-    protected boolean $willUseCookie;
+    protected bool $willUseCookie;
     
     protected array $willUseThisCookie = [];
     
-    protected boolean $willUseCookieSession;
+    protected bool $willUseCookieSession;
     
     protected string $willUseThisCookieFile;
+    
+    protected $userCookieChoice = null;
     
     
     /**

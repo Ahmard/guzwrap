@@ -92,7 +92,7 @@ class TheWrapper
          * Let's check if the request has file
          * If there is file, we will merge form_params with multipart
          */
-        $formParams = $options['form_params'];
+        $formParams = $options['form_params'] ?? null;
         
         if(isset($options['multipart']) && isset($formParams)){
             $keys = array_keys($formParams);
