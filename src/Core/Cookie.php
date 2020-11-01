@@ -1,6 +1,6 @@
 <?php
 
-namespace Guzwrap\Classes;
+namespace Guzwrap\Core;
 
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\FileCookieJar;

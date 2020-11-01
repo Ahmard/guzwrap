@@ -25,7 +25,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ComposerSettings" synchronizationState="SYNCHRONIZE">
+  <component name="ComposerSettings" doNotAsk="true" synchronizationState="SYNCHRONIZE">
     <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
     <execution />
   </component>
@@ -66,6 +66,7 @@
       <option name="presentableId" value="Default" />
       <updated>1604225694791</updated>
       <workItem from="1604225696253" duration="5538000" />
+      <workItem from="1604232461687" duration="200000" />
     </task>
     <servers />
   </component>
@@ -82,6 +83,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="552" y="324" width="312" height="154" key="NewPhpFileDialog" timestamp="1604226665176">

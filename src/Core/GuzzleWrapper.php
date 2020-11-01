@@ -1,14 +1,14 @@
 <?php
 
-namespace Guzwrap\Classes;
+namespace Guzwrap\Core;
 
 use Guzwrap\UserAgent;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Throwable;
 
-class TheWrapper
+class GuzzleWrapper
 {
     //Import cookie handler
     use Cookie;
@@ -90,7 +90,7 @@ class TheWrapper
     /**
      * Execute the request
      * @return ResponseInterface
-     * @throws GuzzleException
+     * @throws Throwable
      */
     public function exec()
     {
@@ -159,7 +159,7 @@ class TheWrapper
     /**
      * Describes the redirect behavior of a request.
      * @param mixed $options
-     * @return TheWrapper
+     * @return GuzzleWrapper
      */
     public function allowRedirects($options = true)
     {
@@ -328,7 +328,7 @@ class TheWrapper
     }
 
     /**
-     * Request http erros
+     * Request http errors
      * @param bool $bool
      * @return $this
      */
@@ -448,7 +448,7 @@ class TheWrapper
     }
 
     /**
-     * Provide sslkey for this request
+     * Provide ssl key for this request
      * @param string $fileOrPassword
      * @param null $password
      * @return $this
