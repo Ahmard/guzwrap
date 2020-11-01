@@ -1,19 +1,18 @@
 <?php
+
 namespace Guzwrap\Classes;
 
 class Header
 {
-    protected $options = array();
-    
-    
-    public function add($name, $value)
+    protected array $options = array();
+
+    public function add($name, $value): self
     {
         $this->options[$name] = $value;
         return $this;
     }
-    
-    
-    public function getOptions()
+
+    public function getOptions(): array
     {
         return $this->options;
     }

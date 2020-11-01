@@ -3,6 +3,8 @@
     "description": "A wrapper around popular php http client, \"GuzzleHttp\"",
     "type": "library",
     "require": {
+        "php": "^7.4",
+        "ext-json": "*",
         "guzzlehttp/guzzle": "^6.5"
     },
     "autoload": {

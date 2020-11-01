@@ -1,42 +1,43 @@
 <?php
+
 namespace Guzwrap\Classes;
 
 use GuzzleHttp\Cookie\CookieJar;
-use GuzzleHttp\Cookie\SessionCookieJar;
 use GuzzleHttp\Cookie\FileCookieJar;
+use GuzzleHttp\Cookie\SessionCookieJar;
 
 trait Cookie
 {
     protected bool $willUseCookie;
-    
+
     protected array $willUseThisCookie = [];
-    
-    protected bool $willUseCookieSession;
-    
+
+    protected SessionCookieJar $willUseCookieSession;
+
     protected string $willUseThisCookieFile;
-    
-    protected $userCookieChoice = null;
-    
-    
+
+    protected string $userCookieChoice = '';
+
+
     /**
      * Use cookie provided by guzzle
-     * @param void
-     * @return Guzwrap\Request
+     * @param null $jar
+     * @return Cookie
      */
     public function withCookie($jar = null)
     {
-        if($jar == null){
+        if ($jar == null) {
             $jar = new CookieJar();
         }
         $this->userCookieChoice = true;
         return $this;
     }
-    
-    
+
+
     /**
      * Send request with cookie from file and stored to file
      * @param string 'fileloc/filename'
-     * @return Guzwrap\Request
+     * @return Cookie
      */
     public function withCookieFile(string $file)
     {
@@ -44,25 +45,26 @@ trait Cookie
         $this->userCookieChoice = $jar;
         return $this;
     }
-    
-    
+
+
     /**
      * Send request with cookie session
-     * @param string $name 
-     * @return Guzwrap\Request
+     * @param string $name
+     * @return Cookie
      */
-    public function withCookieSession($name)
+    public function withCookieSession(string $name)
     {
         $jar = new SessionCookieJar($name, true);
         $this->willUseCookieSession = $jar;
         return $this;
     }
-    
-    
+
+
     /**
      * If user have cookie in hand
      * @param array cookie list
-     * @return Guzwrap\Request
+     * @param string $domain
+     * @return Cookie
      */
     public function withCookieArray(array $cookies, string $domain)
     {
@@ -70,11 +72,11 @@ trait Cookie
         $this->userCookieChoice = $jar;
         return $this;
     }
-    
-    
+
+
     protected function getCookieOptions()
     {
-        if($this->userCookieChoice == null){
+        if ($this->userCookieChoice == null) {
             return [];
         }
         return ['cookies' => $this->userCookieChoice];

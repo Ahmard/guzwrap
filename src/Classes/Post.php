@@ -1,37 +1,36 @@
 <?php
-namespace Guzwrap\Classes;
 
-use Guzwrap\Classes\File;
-use Guzwrap\Classes\Header;
+namespace Guzwrap\Classes;
 
 class Post
 {
-    protected $options = array();
-    
-    protected $formParams = array();
-    
-    protected $hasFile = false;
-    
-    
-    public function url($url)
+    protected array $options = array();
+
+    protected array $formParams = array();
+
+    protected bool $hasFile = false;
+
+
+    public function url($url): self
     {
         $this->options['url'] = $url;
+        return $this;
     }
-    
-    
-    public function field($name, $value)
+
+
+    public function field($name, $value): self
     {
         $this->formParams['form_params'] = [$name => $value];
         return $this;
     }
-    
-    
-    public function file($fileOrKeyOrClosure, $value = null)
+
+
+    public function file($fileOrKeyOrClosure, $value = null): self
     {
         $this->hasFile = true;
-        
+
         $firstParamType = gettype($fileOrKeyOrClosure);
-        switch($firstParamType){
+        switch ($firstParamType) {
             case 'object':
                 $fileObj = new File();
                 $fileOrKeyOrClosure($fileObj);
@@ -47,14 +46,14 @@ class Post
                 $options = $fileObj->getOptions();
                 break;
         }
-        
+
         $this->options['multipart'][] = $options;
-        
+
         return $this;
     }
-    
-    
-    public function getOptions()
+
+
+    public function getOptions(): array
     {
         return array_merge(
             $this->formParams,
