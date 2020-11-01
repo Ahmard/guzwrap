@@ -7,7 +7,7 @@ trait RequestMethods
     /**
      * Send GET request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function get(...$args)
     {
@@ -17,7 +17,7 @@ trait RequestMethods
     /**
      * Send HEAD request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function head(...$args)
     {
@@ -27,7 +27,7 @@ trait RequestMethods
     /**
      * Send POST request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function post(...$args)
     {
@@ -37,7 +37,7 @@ trait RequestMethods
     /**
      * Send http put request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function put(...$args)
     {
@@ -47,7 +47,7 @@ trait RequestMethods
     /**
      * Send http delete request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function delete(...$args)
     {
@@ -57,7 +57,7 @@ trait RequestMethods
     /**
      * Send http connect request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function connect(...$args)
     {
@@ -67,7 +67,7 @@ trait RequestMethods
     /**
      * Send http options request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function options(...$args)
     {
@@ -77,7 +77,7 @@ trait RequestMethods
     /**
      * Send http trace request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function trace(...$args)
     {
@@ -87,7 +87,7 @@ trait RequestMethods
     /**
      * Send http patch request
      * @param mixed ...$args
-     * @return mixed
+     * @return $this
      */
     public function patch(...$args)
     {
