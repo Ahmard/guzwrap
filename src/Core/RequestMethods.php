@@ -6,92 +6,92 @@ trait RequestMethods
 {
     /**
      * Send GET request
-     * @param mixed ...$args
+     * @param string $url
      * @return $this
      */
-    public function get(...$args)
+    public function get(string $url)
     {
-        return $this->request('GET', ...$args);
+        return $this->request('GET', $url);
     }
 
     /**
      * Send HEAD request
-     * @param mixed ...$args
+     * @param string $url
      * @return $this
      */
-    public function head(...$args)
+    public function head(string $url)
     {
-        return $this->request('HEAD', ...$args);
+        return $this->request('HEAD', $url);
     }
 
     /**
      * Send POST request
-     * @param mixed ...$args
+     * @param string|callable $urlOrClosure
      * @return $this
      */
-    public function post(...$args)
+    public function post($urlOrClosure)
     {
-        return $this->request('POST', ...$args);
+        return $this->request('POST', $urlOrClosure);
     }
 
     /**
      * Send http put request
-     * @param mixed ...$args
+     * @param string $url
      * @return $this
      */
-    public function put(...$args)
+    public function put(string $url)
     {
-        return $this->request('PUT', ...$args);
+        return $this->request('PUT', $url);
     }
 
     /**
      * Send http delete request
-     * @param mixed ...$args
+     * @param string $url
      * @return $this
      */
-    public function delete(...$args)
+    public function delete(string $url)
     {
-        return $this->request('DELETE', ...$args);
+        return $this->request('DELETE', $url);
     }
 
     /**
      * Send http connect request
-     * @param mixed ...$args
+     * @param string $url
      * @return $this
      */
-    public function connect(...$args)
+    public function connect(string $url)
     {
-        return $this->request('CONNECT', ...$args);
+        return $this->request('CONNECT', $url);
     }
 
     /**
      * Send http options request
-     * @param mixed ...$args
+     * @param string $url
      * @return $this
      */
-    public function options(...$args)
+    public function options(string $url)
     {
-        return $this->request('OPTIONS', ...$args);
+        return $this->request('OPTIONS', $url);
     }
 
     /**
      * Send http trace request
-     * @param mixed ...$args
+     * @param string $url
      * @return $this
      */
-    public function trace(...$args)
+    public function trace(string $url)
     {
-        return $this->request('TRACE', ...$args);
+        return $this->request('TRACE', $url);
     }
 
     /**
      * Send http patch request
-     * @param mixed ...$args
+     * @param string $url
      * @return $this
      */
-    public function patch(...$args)
+    public function patch(string $url)
     {
-        return $this->request('PATCH', ...$args);
+        return $this->request('PATCH', $url);
     }
 
 }

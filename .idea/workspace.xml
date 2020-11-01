@@ -67,6 +67,7 @@
       <updated>1604225694791</updated>
       <workItem from="1604225696253" duration="5538000" />
       <workItem from="1604232461687" duration="200000" />
+      <workItem from="1604235075480" duration="695000" />
     </task>
     <servers />
   </component>
@@ -86,6 +87,10 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="60" y="27" width="766" height="741" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1604235164995">
+      <screen x="60" y="27" width="1306" height="741" />
+    </state>
+    <state x="60" y="27" width="766" height="741" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/60.27.1306.741@60.27.1306.741" timestamp="1604235164995" />
     <state x="552" y="324" width="312" height="154" key="NewPhpFileDialog" timestamp="1604226665176">
       <screen x="60" y="27" width="1306" height="741" />
     </state>
