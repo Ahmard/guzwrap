@@ -515,4 +515,13 @@ class GuzzleWrapper
         return $this->addOption('version', $version);
     }
 
+    /**
+     * Send http request with preferred referer url
+     * @param string $refererUrl
+     * @return $this
+     */
+    public function referer(string $refererUrl)
+    {
+        return $this->header('Referer', $refererUrl);
+    }
 }
