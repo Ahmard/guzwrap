@@ -10,26 +10,46 @@ class Post
 
     protected bool $hasFile = false;
 
-
-    public function url($url): self
+    /**
+     * Set form action
+     * @param string $url a http uri to post form to
+     * @return $this
+     */
+    public function url(string $url): self
     {
         $this->options['url'] = $url;
         return $this;
     }
 
-
-    public function field($name, $value): self
+    /**
+     * Add input filed
+     * @param string|array $name name of inout or multidimensional array of ['name' => 'value']
+     * @param string|null $value
+     * @return $this
+     */
+    public function field($name, string $value = null): self
     {
-        $this->formParams['form_params'] = [$name => $value];
+        if (is_array($name)){
+            $this->formParams['form_params'] = array_merge($this->formParams['form_params'], $name);
+            return $this;
+        }
+
+        $this->formParams['form_params'][$name] = $value;
         return $this;
     }
 
-
+    /**
+     * Add file input
+     * @param $fileOrKeyOrClosure
+     * @param null $value
+     * @return $this
+     */
     public function file($fileOrKeyOrClosure, $value = null): self
     {
         $this->hasFile = true;
 
         $firstParamType = gettype($fileOrKeyOrClosure);
+        $options = [];
         switch ($firstParamType) {
             case 'object':
                 $fileObj = new File();
@@ -52,7 +72,10 @@ class Post
         return $this;
     }
 
-
+    /**
+     * Get defined data
+     * @return array
+     */
     public function getOptions(): array
     {
         return array_merge(
