@@ -65,7 +65,7 @@ class Request
      * @param $args
      * @return GuzzleWrapper
      */
-    public static function __callStatic($method, $args)
+    public static function __callStatic($method, $args): GuzzleWrapper
     {
         return (new GuzzleWrapper())->$method(...$args);
     }
@@ -75,7 +75,7 @@ class Request
      * @param void
      * @return GuzzleWrapper
      */
-    public static function getInstance()
+    public static function getInstance(): GuzzleWrapper
     {
         return new GuzzleWrapper();
     }

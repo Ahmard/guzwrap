@@ -21,11 +21,11 @@ class File
 
 
     /**
-     * Use file path insteand of resources
+     * Use file path instead of resources
      * @param string $filePath
      * @return $this
      */
-    public function path($filePath)
+    public function path(string $filePath): File
     {
         $this->filePath = $filePath;
         $this->formOptions['contents'] = fopen($filePath, 'r');
@@ -38,14 +38,14 @@ class File
      * @param $resource
      * @return $this
      */
-    public function resource($resource)
+    public function resource($resource): File
     {
         $this->formOptions['contents'] = $resource;
         return $this;
     }
 
 
-    public function name($filename)
+    public function name(string $filename): File
     {
         $this->formOptions['filename'] = $filename;
         return $this;
@@ -55,14 +55,12 @@ class File
     /**
      * Set header
      * @param $headersOrKeyOrClosure
-     * @param null $value
+     * @param string|null $value
      * @return File
      */
-    public function header($headersOrKeyOrClosure, $value = null)
+    public function header($headersOrKeyOrClosure, string $value = null): File
     {
-        $firstParamType = gettype($headersOrKeyOrClosure);
-
-        switch ($firstParamType) {
+        switch (gettype($headersOrKeyOrClosure)) {
             case 'object':
                 $headerObj = new Header();
                 $headersOrKeyOrClosure($headerObj);
@@ -74,6 +72,10 @@ class File
             case 'string':
                 $options[$headersOrKeyOrClosure] = $value;
                 break;
+            default:
+                throw new \InvalidArgumentException(
+                    "First parameter must be an object of \Guzwrap\Core\Header or an array of headers or name of header
+                ");
         }
 
         $this->options['headers'] = array_merge(

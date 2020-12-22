@@ -9,7 +9,7 @@ trait RequestMethods
      * @param string $url
      * @return $this
      */
-    public function get(string $url)
+    public function get(string $url): RequestMethods
     {
         return $this->request('GET', $url);
     }
@@ -19,7 +19,7 @@ trait RequestMethods
      * @param string $url
      * @return $this
      */
-    public function head(string $url)
+    public function head(string $url): RequestMethods
     {
         return $this->request('HEAD', $url);
     }
@@ -29,7 +29,7 @@ trait RequestMethods
      * @param string|callable $urlOrClosure
      * @return $this
      */
-    public function post($urlOrClosure)
+    public function post($urlOrClosure): RequestMethods
     {
         return $this->request('POST', $urlOrClosure);
     }
@@ -39,7 +39,7 @@ trait RequestMethods
      * @param string $url
      * @return $this
      */
-    public function put(string $url)
+    public function put(string $url): RequestMethods
     {
         return $this->request('PUT', $url);
     }
@@ -49,7 +49,7 @@ trait RequestMethods
      * @param string $url
      * @return $this
      */
-    public function delete(string $url)
+    public function delete(string $url): RequestMethods
     {
         return $this->request('DELETE', $url);
     }
@@ -59,7 +59,7 @@ trait RequestMethods
      * @param string $url
      * @return $this
      */
-    public function connect(string $url)
+    public function connect(string $url): RequestMethods
     {
         return $this->request('CONNECT', $url);
     }
@@ -69,7 +69,7 @@ trait RequestMethods
      * @param string $url
      * @return $this
      */
-    public function options(string $url)
+    public function options(string $url): RequestMethods
     {
         return $this->request('OPTIONS', $url);
     }
@@ -79,7 +79,7 @@ trait RequestMethods
      * @param string $url
      * @return $this
      */
-    public function trace(string $url)
+    public function trace(string $url): RequestMethods
     {
         return $this->request('TRACE', $url);
     }
@@ -89,7 +89,7 @@ trait RequestMethods
      * @param string $url
      * @return $this
      */
-    public function patch(string $url)
+    public function patch(string $url): RequestMethods
     {
         return $this->request('PATCH', $url);
     }

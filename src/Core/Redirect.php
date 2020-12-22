@@ -11,7 +11,7 @@ class Redirect
      * @param int $value
      * @return $this
      */
-    public function max(int $value)
+    public function max(int $value): Redirect
     {
         return $this->setOption('max', $value);
     }
@@ -22,7 +22,7 @@ class Redirect
      * @param $value
      * @return $this
      */
-    public function setOption(string $name, $value)
+    public function setOption(string $name, $value): Redirect
     {
         $this->options[$name] = $value;
         return $this;
@@ -43,7 +43,7 @@ class Redirect
      * @param bool $ref
      * @return $this
      */
-    public function referer(bool $ref = true)
+    public function referer(bool $ref = true): Redirect
     {
         return $this->setOption('referer', $ref);
     }
@@ -53,7 +53,7 @@ class Redirect
      * @param mixed ...$protocols
      * @return $this
      */
-    public function protocols(...$protocols)
+    public function protocols(...$protocols): Redirect
     {
         return $this->setOption('protocols', $protocols);
     }
@@ -63,7 +63,7 @@ class Redirect
      * @param callable $callback
      * @return $this
      */
-    public function onRedirect(callable $callback)
+    public function onRedirect(callable $callback): Redirect
     {
         return $this->setOption('on_redirect', $callback);
     }
@@ -72,7 +72,7 @@ class Redirect
      * Whether to track redirects
      * @return $this
      */
-    public function trackRedirect()
+    public function trackRedirect(): Redirect
     {
         return $this->setOption('track_redirects', true);
     }
@@ -81,7 +81,7 @@ class Redirect
      * Get redirect options
      * @return array
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         if (empty($this->options)) {
             return [];

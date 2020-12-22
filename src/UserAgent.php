@@ -20,14 +20,12 @@ class UserAgent
         $this->files = new DirectoryIterator($this->dirPath);
     }
 
-
     public function getFiles(): DirectoryIterator
     {
         return $this->files;
     }
 
-
-    public function getAvailable()
+    public function getAvailable(): array
     {
         $names = array();
         foreach ($this->files as $file) {
@@ -38,12 +36,10 @@ class UserAgent
         return $names;
     }
 
-
-    public function getFile($file)
+    public function getFile($file): string
     {
         return "{$this->dirPath}{$file}.json";
     }
-
 
     public function getAgents($browser)
     {
@@ -51,7 +47,6 @@ class UserAgent
         $jsonUA = file_get_contents($uaFile);
         return json_decode($jsonUA);
     }
-
 
     public function get($browser = 'chrome', $chosen = null)
     {
@@ -68,7 +63,7 @@ class UserAgent
         //If no ua is chosen, get random
         $chosenKey = null;
         $chosenKey ??= $firstKey ?? rand(0, $totalAgents);
-        //If chosen agent is greater than useragents list
+        //If chosen agent is greater than useragent list
         //We use last user agent
         if ($chosenKey > $totalAgents) {
             $chosenKey = $totalAgents;
@@ -77,11 +72,11 @@ class UserAgent
         //get ua
         $ua = $userAgents[$chosenKey];
 
-        //If we got ourselves childs
+        //If we got ourselves a children
         if (is_array($ua)) {
             $totalSubAgents = count($ua) - 1;
             $secondKey ??= rand(0, $totalSubAgents);
-            //If chosen agent is greater than useragents list
+            //If chosen agent is greater than useragent list
             //We use last user agent
             if ($secondKey > $totalSubAgents) {
                 $secondKey = $totalSubAgents;

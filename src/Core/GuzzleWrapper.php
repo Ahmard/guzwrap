@@ -34,7 +34,7 @@ class GuzzleWrapper
      * @param mixed $value
      * @return $this
      */
-    public function addOption(string $name, $value)
+    public function addOption(string $name, $value): GuzzleWrapper
     {
         if (is_array($value)) {
             $value = array_merge(
@@ -57,7 +57,7 @@ class GuzzleWrapper
      * @param mixed ...$argsOrClosure
      * @return $this
      */
-    public function request(string $type, ...$argsOrClosure)
+    public function request(string $type, ...$argsOrClosure): GuzzleWrapper
     {
         if ($type == 'POST') {
             if (gettype($argsOrClosure[0]) == 'object') {
@@ -92,7 +92,7 @@ class GuzzleWrapper
      * @return ResponseInterface
      * @throws Throwable
      */
-    public function exec()
+    public function exec(): ResponseInterface
     {
         $options = array_merge(
             $this->options,
@@ -131,7 +131,7 @@ class GuzzleWrapper
      * @param string $url
      * @return $this
      */
-    public function url(string $url)
+    public function url(string $url): GuzzleWrapper
     {
         $this->url = $url;
         return $this;
@@ -140,10 +140,10 @@ class GuzzleWrapper
     /**
      * Choose user agent
      * @param string $userAgent
-     * @param null $chosen
+     * @param string|null $chosen
      * @return $this
      */
-    public function userAgent(string $userAgent, $chosen = null)
+    public function userAgent(string $userAgent, string $chosen = null): GuzzleWrapper
     {
         if ($chosen || strlen($userAgent) < 8) {
             $userAgent = (new UserAgent)->get($userAgent, $chosen);
@@ -161,7 +161,7 @@ class GuzzleWrapper
      * @param mixed $options
      * @return GuzzleWrapper
      */
-    public function allowRedirects($options = true)
+    public function allowRedirects(bool $options = true): GuzzleWrapper
     {
         return $this->addOption('allow_redirects', $options);
     }
@@ -171,7 +171,7 @@ class GuzzleWrapper
      * @param callable $callback
      * @return $this
      */
-    public function redirects(callable $callback)
+    public function redirects(callable $callback): GuzzleWrapper
     {
         $redirectObject = new Redirect();
         $callback($redirectObject);
@@ -182,11 +182,11 @@ class GuzzleWrapper
     /**
      * Set request authentication credentials
      * @param $optionOrUsername
-     * @param null $typeOrPassword
-     * @param null $type
+     * @param string|null $typeOrPassword
+     * @param string|null $type
      * @return $this
      */
-    public function auth($optionOrUsername, $typeOrPassword = null, $type = null)
+    public function auth($optionOrUsername, string $typeOrPassword = null, string $type = null): GuzzleWrapper
     {
         $option = $optionOrUsername;
         if (!is_array($optionOrUsername)) {
@@ -207,7 +207,7 @@ class GuzzleWrapper
      * @param $body
      * @return $this
      */
-    public function body($body)
+    public function body($body): GuzzleWrapper
     {
         return $this->addOption('body', $body);
     }
@@ -215,10 +215,10 @@ class GuzzleWrapper
     /**
      * Set certificate
      * @param $optionOrFile
-     * @param null $password
+     * @param string|null $password
      * @return $this
      */
-    public function cert($optionOrFile, $password = null)
+    public function cert($optionOrFile, string $password = null): GuzzleWrapper
     {
         $option = $optionOrFile;
         if (!is_array($optionOrFile)) {
@@ -235,7 +235,7 @@ class GuzzleWrapper
      * @param float $seconds
      * @return $this
      */
-    public function connectTimeout(float $seconds)
+    public function connectTimeout(float $seconds): GuzzleWrapper
     {
         return $this->addOption('connect_timeout', $seconds);
     }
@@ -245,7 +245,7 @@ class GuzzleWrapper
      * @param bool $bool
      * @return $this
      */
-    public function debug($bool = true)
+    public function debug(bool $bool = true): GuzzleWrapper
     {
         return $this->addOption('debug', $bool);
     }
@@ -255,7 +255,7 @@ class GuzzleWrapper
      * @param bool $bool
      * @return $this
      */
-    public function decodeContent($bool = true)
+    public function decodeContent(bool $bool = true): GuzzleWrapper
     {
         return $this->addOption('decode_content', $bool);
     }
@@ -265,7 +265,7 @@ class GuzzleWrapper
      * @param float $delay
      * @return $this
      */
-    public function delay(float $delay)
+    public function delay(float $delay): GuzzleWrapper
     {
         return $this->addOption('delay', $delay);
     }
@@ -275,7 +275,7 @@ class GuzzleWrapper
      * @param $expect
      * @return $this
      */
-    public function expect($expect)
+    public function expect($expect): GuzzleWrapper
     {
         return $this->addOption('expect', $expect);
     }
@@ -285,7 +285,7 @@ class GuzzleWrapper
      * @param string $version
      * @return $this
      */
-    public function forceIPResolve(string $version)
+    public function forceIPResolve(string $version): GuzzleWrapper
     {
         return $this->addOption('force_ip_resolve', $version);
     }
@@ -295,7 +295,7 @@ class GuzzleWrapper
      * @param array $params
      * @return $this
      */
-    public function formParams(array $params)
+    public function formParams(array $params): GuzzleWrapper
     {
         return $this->addOption('form_params', $params);
     }
@@ -306,7 +306,7 @@ class GuzzleWrapper
      * @param null $value
      * @return $this
      */
-    public function header($headersOrKeyOrClosure, $value = null)
+    public function header($headersOrKeyOrClosure, $value = null): GuzzleWrapper
     {
         $firstParamType = gettype($headersOrKeyOrClosure);
 
@@ -322,6 +322,10 @@ class GuzzleWrapper
             case 'string':
                 $options[$headersOrKeyOrClosure] = $value;
                 break;
+            default:
+                throw new \InvalidArgumentException(
+                    "First parameter must be an object of \Guzwrap\Core\Header or an array of headers or name of header
+                ");
         }
 
         return $this->addOption('headers', $options);
@@ -332,7 +336,7 @@ class GuzzleWrapper
      * @param bool $bool
      * @return $this
      */
-    public function httpErrors($bool = true)
+    public function httpErrors(bool $bool = true): GuzzleWrapper
     {
         return $this->addOption('http_errors', $bool);
     }
@@ -342,7 +346,7 @@ class GuzzleWrapper
      * @param bool $bool
      * @return $this
      */
-    public function idnConversion($bool = true)
+    public function idnConversion(bool $bool = true): GuzzleWrapper
     {
         return $this->addOption('idn_conversion', $bool);
     }
@@ -352,7 +356,7 @@ class GuzzleWrapper
      * @param string $json
      * @return $this
      */
-    public function json(string $json)
+    public function json(string $json): GuzzleWrapper
     {
         return $this->addOption('json', $json);
     }
@@ -362,7 +366,7 @@ class GuzzleWrapper
      * @param array $data
      * @return $this
      */
-    public function multipart(array $data)
+    public function multipart(array $data): GuzzleWrapper
     {
         return $this->addOption('multipart', $data);
     }
@@ -372,7 +376,7 @@ class GuzzleWrapper
      * @param callable $callback
      * @return $this
      */
-    public function onHeaders(callable $callback)
+    public function onHeaders(callable $callback): GuzzleWrapper
     {
         return $this->addOption('on_headers', $callback);
     }
@@ -382,7 +386,7 @@ class GuzzleWrapper
      * @param callable $callback
      * @return $this
      */
-    public function onStats(callable $callback)
+    public function onStats(callable $callback): GuzzleWrapper
     {
         return $this->addOption('on_stats', $callback);
     }
@@ -392,7 +396,7 @@ class GuzzleWrapper
      * @param callable $callback
      * @return $this
      */
-    public function progress(callable $callback)
+    public function progress(callable $callback): GuzzleWrapper
     {
         return $this->addOption('progress', $callback);
     }
@@ -402,19 +406,24 @@ class GuzzleWrapper
      * @param string $url
      * @return $this
      */
-    public function proxy(string $url)
+    public function proxy(string $url): GuzzleWrapper
     {
         return $this->addOption('proxy', $url);
     }
 
     /**
      * Url queries
-     * @param $queries
+     * @param string|array $queriesOrName an array of queries or query name
+     * @param string|null $queryValue
      * @return $this
      */
-    public function query($queries)
+    public function query($queriesOrName, string $queryValue = null): GuzzleWrapper
     {
-        return $this->addOption('query', $queries);
+        if (is_string($queriesOrName)) {
+            return $this->addOption('query', [$queriesOrName => $queryValue]);
+        }
+
+        return $this->addOption('query', $queriesOrName);
     }
 
     /**
@@ -422,7 +431,7 @@ class GuzzleWrapper
      * @param float $seconds
      * @return $this
      */
-    public function readTimeout(float $seconds)
+    public function readTimeout(float $seconds): GuzzleWrapper
     {
         return $this->addOption('read_timeout', $seconds);
     }
@@ -432,7 +441,7 @@ class GuzzleWrapper
      * @param $file
      * @return $this
      */
-    public function sink($file)
+    public function sink($file): GuzzleWrapper
     {
         return $this->addOption('sink', $file);
     }
@@ -442,7 +451,7 @@ class GuzzleWrapper
      * @param StreamInterface $stream
      * @return $this
      */
-    public function saveTo(StreamInterface $stream)
+    public function saveTo(StreamInterface $stream): GuzzleWrapper
     {
         return $this->addOption('save_to', $stream);
     }
@@ -453,7 +462,7 @@ class GuzzleWrapper
      * @param null $password
      * @return $this
      */
-    public function sslKey(string $fileOrPassword, $password = null)
+    public function sslKey(string $fileOrPassword, $password = null): GuzzleWrapper
     {
         $option = array();
         if (!is_array($fileOrPassword)) {
@@ -470,7 +479,7 @@ class GuzzleWrapper
      * @param bool $bool
      * @return $this
      */
-    public function stream($bool = true)
+    public function stream(bool $bool = true): GuzzleWrapper
     {
         return $this->addOption('stream', $bool);
     }
@@ -480,7 +489,7 @@ class GuzzleWrapper
      * @param bool $bool
      * @return $this
      */
-    public function synchronous($bool = true)
+    public function synchronous(bool $bool = true): GuzzleWrapper
     {
         return $this->addOption('synchronous', $bool);
     }
@@ -490,7 +499,7 @@ class GuzzleWrapper
      * @param $verify
      * @return $this
      */
-    public function verify($verify)
+    public function verify($verify): GuzzleWrapper
     {
         return $this->addOption('verify', $verify);
     }
@@ -500,7 +509,7 @@ class GuzzleWrapper
      * @param float $seconds
      * @return $this
      */
-    public function timeout(float $seconds)
+    public function timeout(float $seconds): GuzzleWrapper
     {
         return $this->addOption('timeout', $seconds);
     }
@@ -510,7 +519,7 @@ class GuzzleWrapper
      * @param string $version
      * @return $this
      */
-    public function version(string $version)
+    public function version(string $version): GuzzleWrapper
     {
         return $this->addOption('version', $version);
     }
@@ -520,7 +529,7 @@ class GuzzleWrapper
      * @param string $refererUrl
      * @return $this
      */
-    public function referer(string $refererUrl)
+    public function referer(string $refererUrl): GuzzleWrapper
     {
         return $this->header('Referer', $refererUrl);
     }
