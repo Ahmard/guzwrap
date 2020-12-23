@@ -12,5 +12,8 @@
             "Guzwrap\\": "src/"
         }
     },
-    "license": "mit"
+    "license": "mit",
+    "require-dev": {
+        "phpstan/phpstan": "^0.12.64"
+    }
 }

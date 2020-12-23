@@ -40,11 +40,11 @@ class Post
 
     /**
      * Add file input
-     * @param $fileOrKeyOrClosure
-     * @param null $value
+     * @param string|array|callable $fileOrKeyOrClosure
+     * @param string|null $value
      * @return $this
      */
-    public function file($fileOrKeyOrClosure, $value = null): self
+    public function file($fileOrKeyOrClosure, string $value = null): self
     {
         $this->hasFile = true;
 

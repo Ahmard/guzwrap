@@ -35,7 +35,7 @@ class File
 
     /**
      * Use file resource instead of path
-     * @param $resource
+     * @param resource $resource
      * @return $this
      */
     public function resource($resource): File
@@ -54,7 +54,7 @@ class File
 
     /**
      * Set header
-     * @param $headersOrKeyOrClosure
+     * @param string|array $headersOrKeyOrClosure
      * @param string|null $value
      * @return File
      */

@@ -7,9 +7,9 @@ trait RequestMethods
     /**
      * Send GET request
      * @param string $url
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function get(string $url): RequestMethods
+    public function get(string $url): GuzzleWrapper
     {
         return $this->request('GET', $url);
     }
@@ -17,9 +17,9 @@ trait RequestMethods
     /**
      * Send HEAD request
      * @param string $url
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function head(string $url): RequestMethods
+    public function head(string $url): GuzzleWrapper
     {
         return $this->request('HEAD', $url);
     }
@@ -27,9 +27,9 @@ trait RequestMethods
     /**
      * Send POST request
      * @param string|callable $urlOrClosure
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function post($urlOrClosure): RequestMethods
+    public function post($urlOrClosure): GuzzleWrapper
     {
         return $this->request('POST', $urlOrClosure);
     }
@@ -37,9 +37,9 @@ trait RequestMethods
     /**
      * Send http put request
      * @param string $url
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function put(string $url): RequestMethods
+    public function put(string $url): GuzzleWrapper
     {
         return $this->request('PUT', $url);
     }
@@ -47,9 +47,9 @@ trait RequestMethods
     /**
      * Send http delete request
      * @param string $url
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function delete(string $url): RequestMethods
+    public function delete(string $url): GuzzleWrapper
     {
         return $this->request('DELETE', $url);
     }
@@ -57,9 +57,9 @@ trait RequestMethods
     /**
      * Send http connect request
      * @param string $url
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function connect(string $url): RequestMethods
+    public function connect(string $url): GuzzleWrapper
     {
         return $this->request('CONNECT', $url);
     }
@@ -67,9 +67,9 @@ trait RequestMethods
     /**
      * Send http options request
      * @param string $url
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function options(string $url): RequestMethods
+    public function options(string $url): GuzzleWrapper
     {
         return $this->request('OPTIONS', $url);
     }
@@ -77,9 +77,9 @@ trait RequestMethods
     /**
      * Send http trace request
      * @param string $url
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function trace(string $url): RequestMethods
+    public function trace(string $url): GuzzleWrapper
     {
         return $this->request('TRACE', $url);
     }
@@ -87,9 +87,9 @@ trait RequestMethods
     /**
      * Send http patch request
      * @param string $url
-     * @return $this
+     * @return GuzzleWrapper
      */
-    public function patch(string $url): RequestMethods
+    public function patch(string $url): GuzzleWrapper
     {
         return $this->request('PATCH', $url);
     }

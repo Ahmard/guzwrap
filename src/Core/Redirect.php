@@ -19,7 +19,7 @@ class Redirect
     /**
      * Set redirect option
      * @param string $name
-     * @param $value
+     * @param mixed $value
      * @return $this
      */
     public function setOption(string $name, $value): Redirect

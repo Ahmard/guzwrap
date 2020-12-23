@@ -61,18 +61,17 @@ class Request
 {
     /**
      * handle first static call
-     * @param $method
-     * @param $args
+     * @param string $method
+     * @param array $args
      * @return GuzzleWrapper
      */
-    public static function __callStatic($method, $args): GuzzleWrapper
+    public static function __callStatic(string $method, array $args): GuzzleWrapper
     {
         return (new GuzzleWrapper())->$method(...$args);
     }
 
     /**
      * Get the request wrapper instance
-     * @param void
      * @return GuzzleWrapper
      */
     public static function getInstance(): GuzzleWrapper

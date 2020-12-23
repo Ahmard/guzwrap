@@ -8,38 +8,32 @@ use GuzzleHttp\Cookie\SessionCookieJar;
 
 trait Cookie
 {
-    protected bool $willUseCookie;
-
-    protected array $willUseThisCookie = [];
-
     protected SessionCookieJar $willUseCookieSession;
 
-    protected string $willUseThisCookieFile;
-
-    protected string $userCookieChoice = '';
+    protected $userCookieChoice;
 
 
     /**
      * Use cookie provided by guzzle
      * @param null $jar
-     * @return Cookie
+     * @return GuzzleWrapper
      */
-    public function withCookie($jar = null): Cookie
+    public function withCookie($jar = null): GuzzleWrapper
     {
         if ($jar == null) {
             $jar = new CookieJar();
         }
-        $this->userCookieChoice = true;
+        $this->userCookieChoice = $jar;
         return $this;
     }
 
 
     /**
      * Send request with cookie from file and stored to file
-     * @param string 'file location/filename'
-     * @return Cookie
+     * @param string $file 'file location/filename'
+     * @return GuzzleWrapper
      */
-    public function withCookieFile(string $file): Cookie
+    public function withCookieFile(string $file): GuzzleWrapper
     {
         $jar = new FileCookieJar($file);
         $this->userCookieChoice = $jar;
@@ -50,9 +44,9 @@ trait Cookie
     /**
      * Send request with cookie session
      * @param string $name
-     * @return Cookie
+     * @return GuzzleWrapper
      */
-    public function withCookieSession(string $name): Cookie
+    public function withCookieSession(string $name): GuzzleWrapper
     {
         $jar = new SessionCookieJar($name, true);
         $this->willUseCookieSession = $jar;
@@ -62,11 +56,11 @@ trait Cookie
 
     /**
      * If user have cookie in hand
-     * @param array cookie list
+     * @param array $cookies cookie list
      * @param string $domain
-     * @return Cookie
+     * @return GuzzleWrapper
      */
-    public function withCookieArray(array $cookies, string $domain): Cookie
+    public function withCookieArray(array $cookies, string $domain): GuzzleWrapper
     {
         $jar = CookieJar::fromArray($cookies, $domain);
         $this->userCookieChoice = $jar;

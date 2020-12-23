@@ -158,7 +158,7 @@ class GuzzleWrapper
 
     /**
      * Describes the redirect behavior of a request.
-     * @param mixed $options
+     * @param bool $options
      * @return GuzzleWrapper
      */
     public function allowRedirects(bool $options = true): GuzzleWrapper
@@ -181,7 +181,7 @@ class GuzzleWrapper
 
     /**
      * Set request authentication credentials
-     * @param $optionOrUsername
+     * @param string|array $optionOrUsername
      * @param string|null $typeOrPassword
      * @param string|null $type
      * @return $this
@@ -204,7 +204,7 @@ class GuzzleWrapper
 
     /**
      * Set request body
-     * @param $body
+     * @param mixed $body
      * @return $this
      */
     public function body($body): GuzzleWrapper
@@ -214,7 +214,7 @@ class GuzzleWrapper
 
     /**
      * Set certificate
-     * @param $optionOrFile
+     * @param string|array $optionOrFile
      * @param string|null $password
      * @return $this
      */
@@ -271,8 +271,8 @@ class GuzzleWrapper
     }
 
     /**
-     * Set expect value
-     * @param $expect
+     * Controls the behavior of the "Expect: 100-Continue" header.
+     * @param int|bool $expect
      * @return $this
      */
     public function expect($expect): GuzzleWrapper
@@ -302,11 +302,11 @@ class GuzzleWrapper
 
     /**
      * Set request headers
-     * @param $headersOrKeyOrClosure
-     * @param null $value
+     * @param string|array $headersOrKeyOrClosure
+     * @param string|null $value
      * @return $this
      */
-    public function header($headersOrKeyOrClosure, $value = null): GuzzleWrapper
+    public function header($headersOrKeyOrClosure, string $value = null): GuzzleWrapper
     {
         $firstParamType = gettype($headersOrKeyOrClosure);
 
@@ -438,7 +438,7 @@ class GuzzleWrapper
 
     /**
      * Save request response body to file
-     * @param $file
+     * @param mixed $file string (path to file on disk), fopen() resource, Psr\Http\Message\StreamInterface
      * @return $this
      */
     public function sink($file): GuzzleWrapper
@@ -458,11 +458,11 @@ class GuzzleWrapper
 
     /**
      * Provide ssl key for this request
-     * @param string $fileOrPassword
+     * @param string|array $fileOrPassword
      * @param null $password
      * @return $this
      */
-    public function sslKey(string $fileOrPassword, $password = null): GuzzleWrapper
+    public function sslKey($fileOrPassword, $password = null): GuzzleWrapper
     {
         $option = array();
         if (!is_array($fileOrPassword)) {
@@ -495,8 +495,8 @@ class GuzzleWrapper
     }
 
     /**
-     * Request verification
-     * @param $verify
+     * Describes the SSL certificate verification behavior of a request.
+     * @param string|bool $verify
      * @return $this
      */
     public function verify($verify): GuzzleWrapper
