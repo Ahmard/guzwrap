@@ -49,7 +49,7 @@ class UserAgent
     public function getAgents(string $browser)
     {
         $uaFile = $this->getFile($browser);
-        $jsonUA = file_get_contents($uaFile);
+        $jsonUA = (string)file_get_contents($uaFile);
         return json_decode($jsonUA);
     }
 

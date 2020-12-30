@@ -48,13 +48,18 @@ class Post
     {
         $this->hasFile = true;
 
-        $firstParamType = gettype($fileOrKeyOrClosure);
         $options = [];
-        switch ($firstParamType) {
+        switch (gettype($fileOrKeyOrClosure)) {
             case 'object':
-                $fileObj = new File();
-                $fileOrKeyOrClosure($fileObj);
-                $options = $fileObj->getOptions();
+                if (is_callable($fileOrKeyOrClosure)){
+                    $fileObj = new File();
+                    $fileOrKeyOrClosure($fileObj);
+                    $options = $fileObj->getOptions();
+                }else{
+                    $className = __CLASS__;
+                    $methodName = __METHOD__;
+                    throw new \InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                }
                 break;
             case 'array':
                 $options = $fileOrKeyOrClosure;

@@ -68,9 +68,15 @@ class File
     {
         switch (gettype($headersOrKeyOrClosure)) {
             case 'object':
-                $headerObj = new Header();
-                $headersOrKeyOrClosure($headerObj);
-                $options = array_merge($this->options['headers'], $headerObj->getOptions());
+                if (is_callable($headersOrKeyOrClosure)) {
+                    $headerObj = new Header();
+                    $headersOrKeyOrClosure($headerObj);
+                    $options = array_merge($this->options['headers'], $headerObj->getOptions());
+                } else {
+                    $className = __CLASS__;
+                    $methodName = __METHOD__;
+                    throw new \InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                }
                 break;
             case 'array':
                 $options = $headersOrKeyOrClosure;

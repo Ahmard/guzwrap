@@ -2,13 +2,13 @@
 
 namespace Guzwrap\Core;
 
+use Guzwrap\RequestInterface;
 use Guzwrap\UserAgent;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Throwable;
 
-class GuzzleWrapper
+class GuzzleWrapper implements RequestInterface
 {
     //Import cookie handler
     use Cookie;
@@ -29,10 +29,7 @@ class GuzzleWrapper
     protected array $oneTimedOption = array();
 
     /**
-     * Add option to this request
-     * @param string $name
-     * @param mixed $value
-     * @return $this
+     * @inheritDoc
      */
     public function addOption(string $name, $value): GuzzleWrapper
     {
@@ -52,10 +49,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Make http request
-     * @param string $type
-     * @param mixed ...$argsOrClosure
-     * @return $this
+     * @inheritDoc
      */
     public function request(string $type, ...$argsOrClosure): GuzzleWrapper
     {
@@ -87,9 +81,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Get generated request data
-     * this data can be passed to guzzle directly
-     * @return string[]
+     * @inheritDoc
      */
     public function getRequestData(): array
     {
@@ -124,9 +116,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Execute the request
-     * @return ResponseInterface
-     * @throws Throwable
+     * @inheritDoc
      */
     public function exec(): ResponseInterface
     {
@@ -141,9 +131,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request url
-     * @param string $url
-     * @return $this
+     * @inheritDoc
      */
     public function url(string $url): GuzzleWrapper
     {
@@ -152,10 +140,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Choose user agent
-     * @param string $userAgent
-     * @param string|null $chosen
-     * @return $this
+     * @inheritDoc
      */
     public function userAgent(string $userAgent, string $chosen = null): GuzzleWrapper
     {
@@ -171,9 +156,7 @@ class GuzzleWrapper
 
 
     /**
-     * Describes the redirect behavior of a request.
-     * @param bool $options
-     * @return GuzzleWrapper
+     * @inheritDoc
      */
     public function allowRedirects(bool $options = true): GuzzleWrapper
     {
@@ -181,9 +164,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set redirect handler
-     * @param callable $callback
-     * @return $this
+     * @inheritDoc
      */
     public function redirects(callable $callback): GuzzleWrapper
     {
@@ -194,11 +175,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request authentication credentials
-     * @param string|array $optionOrUsername
-     * @param string|null $typeOrPassword
-     * @param string|null $type
-     * @return $this
+     * @inheritDoc
      */
     public function auth($optionOrUsername, string $typeOrPassword = null, string $type = null): GuzzleWrapper
     {
@@ -217,9 +194,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request body
-     * @param mixed $body
-     * @return $this
+     * @inheritDoc
      */
     public function body($body): GuzzleWrapper
     {
@@ -227,10 +202,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set certificate
-     * @param string|array $optionOrFile
-     * @param string|null $password
-     * @return $this
+     * @inheritDoc
      */
     public function cert($optionOrFile, string $password = null): GuzzleWrapper
     {
@@ -245,9 +217,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set connection timeout
-     * @param float $seconds
-     * @return $this
+     * @inheritDoc
      */
     public function connectTimeout(float $seconds): GuzzleWrapper
     {
@@ -255,9 +225,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Whether to display debug information
-     * @param bool $bool
-     * @return $this
+     * @inheritDoc
      */
     public function debug(bool $bool = true): GuzzleWrapper
     {
@@ -265,9 +233,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Decode content
-     * @param bool $bool
-     * @return $this
+     * @inheritDoc
      */
     public function decodeContent(bool $bool = true): GuzzleWrapper
     {
@@ -275,9 +241,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set delay to a request
-     * @param float $delay
-     * @return $this
+     * @inheritDoc
      */
     public function delay(float $delay): GuzzleWrapper
     {
@@ -285,9 +249,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Controls the behavior of the "Expect: 100-Continue" header.
-     * @param int|bool $expect
-     * @return $this
+     * @inheritDoc
      */
     public function expect($expect): GuzzleWrapper
     {
@@ -295,9 +257,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Force to resolve ip address
-     * @param string $version
-     * @return $this
+     * @inheritDoc
      */
     public function forceIPResolve(string $version): GuzzleWrapper
     {
@@ -305,9 +265,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request form parameters
-     * @param array $params
-     * @return $this
+     * @inheritDoc
      */
     public function formParams(array $params): GuzzleWrapper
     {
@@ -315,10 +273,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request headers
-     * @param string|array $headersOrKeyOrClosure
-     * @param string|null $value
-     * @return $this
+     * @inheritDoc
      */
     public function header($headersOrKeyOrClosure, string $value = null): GuzzleWrapper
     {
@@ -326,9 +281,15 @@ class GuzzleWrapper
 
         switch ($firstParamType) {
             case 'object':
-                $headerObj = new Header();
-                $headersOrKeyOrClosure($headerObj);
-                $options = array_merge(($this->options['headers'] ?? []), $headerObj->getOptions());
+                if (is_callable($headersOrKeyOrClosure)) {
+                    $headerObj = new Header();
+                    $headersOrKeyOrClosure($headerObj);
+                    $options = array_merge(($this->options['headers'] ?? []), $headerObj->getOptions());
+                } else {
+                    $className = __CLASS__;
+                    $methodName = __METHOD__;
+                    throw new \InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                }
                 break;
             case 'array':
                 $options = $headersOrKeyOrClosure;
@@ -346,9 +307,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Request http errors
-     * @param bool $bool
-     * @return $this
+     * @inheritDoc
      */
     public function httpErrors(bool $bool = true): GuzzleWrapper
     {
@@ -356,9 +315,7 @@ class GuzzleWrapper
     }
 
     /**
-     * IDN Conversion
-     * @param bool $bool
-     * @return $this
+     * @inheritDoc
      */
     public function idnConversion(bool $bool = true): GuzzleWrapper
     {
@@ -366,9 +323,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Mark request's content-type as json
-     * @param string $json
-     * @return $this
+     * @inheritDoc
      */
     public function json(string $json): GuzzleWrapper
     {
@@ -376,9 +331,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request as multipart
-     * @param array $data
-     * @return $this
+     * @inheritDoc
      */
     public function multipart(array $data): GuzzleWrapper
     {
@@ -386,9 +339,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Listen to headers event
-     * @param callable $callback
-     * @return $this
+     * @inheritDoc
      */
     public function onHeaders(callable $callback): GuzzleWrapper
     {
@@ -396,9 +347,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Listen to stats event
-     * @param callable $callback
-     * @return $this
+     * @inheritDoc
      */
     public function onStats(callable $callback): GuzzleWrapper
     {
@@ -406,9 +355,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Monitor request progress
-     * @param callable $callback
-     * @return $this
+     * @inheritDoc
      */
     public function progress(callable $callback): GuzzleWrapper
     {
@@ -416,9 +363,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request proxy url
-     * @param string $url
-     * @return $this
+     * @inheritDoc
      */
     public function proxy(string $url): GuzzleWrapper
     {
@@ -426,10 +371,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Url queries
-     * @param string|array $queriesOrName an array of queries or query name
-     * @param string|null $queryValue
-     * @return $this
+     * @inheritDoc
      */
     public function query($queriesOrName, string $queryValue = null): GuzzleWrapper
     {
@@ -441,9 +383,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set read timeout
-     * @param float $seconds
-     * @return $this
+     * @inheritDoc
      */
     public function readTimeout(float $seconds): GuzzleWrapper
     {
@@ -451,9 +391,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Save request response body to file
-     * @param mixed $file string (path to file on disk), fopen() resource, Psr\Http\Message\StreamInterface
-     * @return $this
+     * @inheritDoc
      */
     public function sink($file): GuzzleWrapper
     {
@@ -461,9 +399,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Save request response body to file
-     * @param StreamInterface $stream
-     * @return $this
+     * @inheritDoc
      */
     public function saveTo(StreamInterface $stream): GuzzleWrapper
     {
@@ -471,10 +407,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Provide ssl key for this request
-     * @param string|array $fileOrPassword
-     * @param null $password
-     * @return $this
+     * @inheritDoc
      */
     public function sslKey($fileOrPassword, $password = null): GuzzleWrapper
     {
@@ -489,9 +422,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Whether to stream this request
-     * @param bool $bool
-     * @return $this
+     * @inheritDoc
      */
     public function stream(bool $bool = true): GuzzleWrapper
     {
@@ -499,9 +430,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Whether the request should be asynchronous
-     * @param bool $bool
-     * @return $this
+     * @inheritDoc
      */
     public function synchronous(bool $bool = true): GuzzleWrapper
     {
@@ -509,9 +438,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Describes the SSL certificate verification behavior of a request.
-     * @param string|bool $verify
-     * @return $this
+     * @inheritDoc
      */
     public function verify($verify): GuzzleWrapper
     {
@@ -519,9 +446,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request timeout
-     * @param float $seconds
-     * @return $this
+     * @inheritDoc
      */
     public function timeout(float $seconds): GuzzleWrapper
     {
@@ -529,9 +454,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Set request version
-     * @param string $version
-     * @return $this
+     * @inheritDoc
      */
     public function version(string $version): GuzzleWrapper
     {
@@ -539,9 +462,7 @@ class GuzzleWrapper
     }
 
     /**
-     * Send http request with preferred referer url
-     * @param string $refererUrl
-     * @return $this
+     * @inheritDoc
      */
     public function referer(string $refererUrl): GuzzleWrapper
     {
