@@ -7,8 +7,8 @@ use Guzwrap\Core\GuzzleWrapper;
 /**
  * Class Request
  * @package Guzwrap
- * @method static GuzzleWrapper addOption(string $name, $value) Add option to this request
- * @method static GuzzleWrapper request(string $type, $argsOrClosure) Make http request
+ * @method static GuzzleWrapper addOption(string $name, mixed $value) Add option to this request
+ * @method static GuzzleWrapper request(string $type, mixed $argsOrClosure) Make http request
  * @method static GuzzleWrapper exec() Execute the request
  * @method static GuzzleWrapper url(string $url) Set request url
  * @method static GuzzleWrapper userAgent(string $userAgent, $chosen) Choose user agent

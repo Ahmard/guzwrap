@@ -5,6 +5,7 @@ namespace Guzwrap\Core;
 use Guzwrap\RequestInterface;
 use Guzwrap\UserAgent;
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -30,6 +31,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function addOption(string $name, $value): GuzzleWrapper
     {
@@ -50,6 +52,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function request(string $type, ...$argsOrClosure): GuzzleWrapper
     {
@@ -132,6 +135,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function url(string $url): GuzzleWrapper
     {
@@ -141,6 +145,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function userAgent(string $userAgent, string $chosen = null): GuzzleWrapper
     {
@@ -157,6 +162,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function allowRedirects(bool $options = true): GuzzleWrapper
     {
@@ -165,6 +171,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function redirects(callable $callback): GuzzleWrapper
     {
@@ -176,6 +183,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function auth($optionOrUsername, string $typeOrPassword = null, string $type = null): GuzzleWrapper
     {
@@ -195,6 +203,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function body($body): GuzzleWrapper
     {
@@ -203,6 +212,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function cert($optionOrFile, string $password = null): GuzzleWrapper
     {
@@ -218,6 +228,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function connectTimeout(float $seconds): GuzzleWrapper
     {
@@ -226,6 +237,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function debug(bool $bool = true): GuzzleWrapper
     {
@@ -234,6 +246,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function decodeContent(bool $bool = true): GuzzleWrapper
     {
@@ -242,6 +255,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function delay(float $delay): GuzzleWrapper
     {
@@ -250,6 +264,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function expect($expect): GuzzleWrapper
     {
@@ -258,6 +273,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function forceIPResolve(string $version): GuzzleWrapper
     {
@@ -266,6 +282,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function formParams(array $params): GuzzleWrapper
     {
@@ -274,6 +291,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function header($headersOrKeyOrClosure, string $value = null): GuzzleWrapper
     {
@@ -288,7 +306,7 @@ class GuzzleWrapper implements RequestInterface
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
-                    throw new \InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
                 }
                 break;
             case 'array':
@@ -298,7 +316,7 @@ class GuzzleWrapper implements RequestInterface
                 $options[$headersOrKeyOrClosure] = $value;
                 break;
             default:
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     "First parameter must be an object of \Guzwrap\Core\Header or an array of headers or name of header
                 ");
         }
@@ -308,6 +326,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function httpErrors(bool $bool = true): GuzzleWrapper
     {
@@ -316,6 +335,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function idnConversion(bool $bool = true): GuzzleWrapper
     {
@@ -324,6 +344,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function json(string $json): GuzzleWrapper
     {
@@ -332,6 +353,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function multipart(array $data): GuzzleWrapper
     {
@@ -340,6 +362,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function onHeaders(callable $callback): GuzzleWrapper
     {
@@ -348,6 +371,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function onStats(callable $callback): GuzzleWrapper
     {
@@ -356,6 +380,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function progress(callable $callback): GuzzleWrapper
     {
@@ -364,6 +389,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function proxy(string $url): GuzzleWrapper
     {
@@ -372,6 +398,8 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
+     * @return static
      */
     public function query($queriesOrName, string $queryValue = null): GuzzleWrapper
     {
@@ -384,6 +412,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function readTimeout(float $seconds): GuzzleWrapper
     {
@@ -392,6 +421,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function sink($file): GuzzleWrapper
     {
@@ -400,6 +430,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function saveTo(StreamInterface $stream): GuzzleWrapper
     {
@@ -408,6 +439,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function sslKey($fileOrPassword, $password = null): GuzzleWrapper
     {
@@ -423,6 +455,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function stream(bool $bool = true): GuzzleWrapper
     {
@@ -431,6 +464,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function synchronous(bool $bool = true): GuzzleWrapper
     {
@@ -439,6 +473,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function verify($verify): GuzzleWrapper
     {
@@ -447,6 +482,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function timeout(float $seconds): GuzzleWrapper
     {
@@ -455,6 +491,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function version(string $version): GuzzleWrapper
     {
@@ -463,6 +500,7 @@ class GuzzleWrapper implements RequestInterface
 
     /**
      * @inheritDoc
+     * @return static
      */
     public function referer(string $refererUrl): GuzzleWrapper
     {
