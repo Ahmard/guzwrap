@@ -10,19 +10,23 @@ trait Cookie
 {
     protected SessionCookieJar $willUseCookieSession;
 
+    /**
+     * @var mixed $userCookieChoice
+     */
     protected $userCookieChoice;
 
 
     /**
      * Use cookie provided by guzzle
-     * @param null $jar
+     * @param CookieJar|null $jar
      * @return GuzzleWrapper
      */
-    public function withCookie($jar = null): GuzzleWrapper
+    public function withCookie(?CookieJar $jar = null): GuzzleWrapper
     {
         if ($jar == null) {
             $jar = new CookieJar();
         }
+
         $this->userCookieChoice = $jar;
         return $this;
     }

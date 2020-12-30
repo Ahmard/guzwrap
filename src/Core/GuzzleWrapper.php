@@ -86,20 +86,19 @@ class GuzzleWrapper
         return $this;
     }
 
-
     /**
-     * Execute the request
-     * @return ResponseInterface
-     * @throws Throwable
+     * Get generated request data
+     * this data can be passed to guzzle directly
+     * @return string[]
      */
-    public function exec(): ResponseInterface
+    public function getRequestData(): array
     {
         $options = array_merge(
             $this->options,
             $this->getCookieOptions()
         );
 
-        $url = $options[0] ?? $this->url;
+        $options['the_url'] = $options[0] ?? $this->url;
         // unset($options[0]);
 
         /**
@@ -121,9 +120,24 @@ class GuzzleWrapper
             unset($options['form_params'], $formParams);
         }
 
+        return $options;
+    }
+
+    /**
+     * Execute the request
+     * @return ResponseInterface
+     * @throws Throwable
+     */
+    public function exec(): ResponseInterface
+    {
+        $options = $this->getRequestData();
         $client = new Client($options);
-        //dd($options);
-        return $client->request($this->requestType, $url, $this->oneTimedOption);
+
+        return $client->request(
+            $this->requestType,
+            $options['the_url'],
+            $this->oneTimedOption
+        );
     }
 
     /**

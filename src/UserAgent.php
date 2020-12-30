@@ -8,7 +8,7 @@ class UserAgent
 {
     protected string $dirPath;
 
-    protected $files = array();
+    protected DirectoryIterator $files;
 
     protected array $fileNames = array();
 

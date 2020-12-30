@@ -12,13 +12,16 @@ class File
 
     protected ?string $filePath = null;
 
-
-    public function field($name)
+    /**
+     * Input field name
+     * @param string $name
+     * @return $this
+     */
+    public function field(string $name): File
     {
         $this->formOptions['name'] = $name;
         return $this;
     }
-
 
     /**
      * Use file path instead of resources
@@ -44,13 +47,16 @@ class File
         return $this;
     }
 
-
+    /**
+     * Preferred file name
+     * @param string $filename
+     * @return $this
+     */
     public function name(string $filename): File
     {
         $this->formOptions['filename'] = $filename;
         return $this;
     }
-
 
     /**
      * Set header
@@ -85,7 +91,6 @@ class File
 
         return $this;
     }
-
 
     public function getOptions(): array
     {
