@@ -33,7 +33,7 @@ class Redirect
      * @param bool $bool
      * @return $this
      */
-    public function strict(bool $bool = true)
+    public function strict(bool $bool = true): Redirect
     {
         return $this->setOption('strict', $bool);
     }

@@ -17,18 +17,14 @@ class GuzzleWrapper implements RequestInterface
     //Import requests methods
     use RequestMethods;
 
-    private string $url;
-
-    private string $requestType;
-
     /**
      * Guzzle request options
      * @var array
      */
     protected array $options = array();
-
     protected array $oneTimedOption = array();
-
+    private string $url;
+    private string $requestType;
 
     /**
      * Merge an array of request data with provided one
@@ -38,27 +34,6 @@ class GuzzleWrapper implements RequestInterface
     public function useRequestData(array $options): GuzzleWrapper
     {
         $this->options = array_merge($this->options, $options);
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     * @return static
-     */
-    public function addOption(string $name, $value): GuzzleWrapper
-    {
-        if (is_array($value)) {
-            $value = array_merge(
-                ($this->options[$name] ?? []),
-                $value
-            );
-        }
-
-        $this->options = array_merge(
-            $this->options,
-            [$name => $value]
-        );
-
         return $this;
     }
 
@@ -98,6 +73,25 @@ class GuzzleWrapper implements RequestInterface
     /**
      * @inheritDoc
      */
+    public function exec(): ResponseInterface
+    {
+        $options = $this->getRequestData();
+        $client = new Client($options);
+
+        if (!$options['the_url']) {
+            throw new InvalidArgumentException('You cannot send request without providing request url.');
+        }
+
+        return $client->request(
+            $options['method'],
+            $options['the_url'],
+            $this->oneTimedOption
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getRequestData(): array
     {
         $options = array_merge(
@@ -105,11 +99,14 @@ class GuzzleWrapper implements RequestInterface
             $this->getCookieOptions()
         );
 
-        if (isset($options[0])){
+        if (isset($options[0])) {
             $options['the_url'] = $options[0];
-        }elseif (isset($this->url)){
+        } elseif (isset($this->url)) {
             $options['the_url'] = $this->url;
         }
+        //Set request method
+        $options['method'] = $this->requestType;
+
         // unset($options[0]);
 
         /**
@@ -132,25 +129,6 @@ class GuzzleWrapper implements RequestInterface
         }
 
         return $options;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function exec(): ResponseInterface
-    {
-        $options = $this->getRequestData();
-        $client = new Client($options);
-
-        if (!$options['the_url']){
-            throw new InvalidArgumentException('You cannot send request without providing request url.');
-        }
-
-        return $client->request(
-            $this->requestType,
-            $options['the_url'],
-            $this->oneTimedOption
-        );
     }
 
     /**
@@ -179,6 +157,26 @@ class GuzzleWrapper implements RequestInterface
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     * @return static
+     */
+    public function addOption(string $name, $value): GuzzleWrapper
+    {
+        if (is_array($value)) {
+            $value = array_merge(
+                ($this->options[$name] ?? []),
+                $value
+            );
+        }
+
+        $this->options = array_merge(
+            $this->options,
+            [$name => $value]
+        );
+
+        return $this;
+    }
 
     /**
      * @inheritDoc
@@ -307,41 +305,6 @@ class GuzzleWrapper implements RequestInterface
     public function formParams(array $params): GuzzleWrapper
     {
         return $this->addOption('form_params', $params);
-    }
-
-    /**
-     * @inheritDoc
-     * @return static
-     */
-    public function header($headersOrKeyOrClosure, string $value = null): GuzzleWrapper
-    {
-        $firstParamType = gettype($headersOrKeyOrClosure);
-
-        switch ($firstParamType) {
-            case 'object':
-                if (is_callable($headersOrKeyOrClosure)) {
-                    $headerObj = new Header();
-                    $headersOrKeyOrClosure($headerObj);
-                    $options = array_merge(($this->options['headers'] ?? []), $headerObj->getOptions());
-                } else {
-                    $className = __CLASS__;
-                    $methodName = __METHOD__;
-                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
-                }
-                break;
-            case 'array':
-                $options = $headersOrKeyOrClosure;
-                break;
-            case 'string':
-                $options[$headersOrKeyOrClosure] = $value;
-                break;
-            default:
-                throw new InvalidArgumentException(
-                    "First parameter must be an object of \Guzwrap\Core\Header or an array of headers or name of header
-                ");
-        }
-
-        return $this->addOption('headers', $options);
     }
 
     /**
@@ -525,5 +488,40 @@ class GuzzleWrapper implements RequestInterface
     public function referer(string $refererUrl): GuzzleWrapper
     {
         return $this->header('Referer', $refererUrl);
+    }
+
+    /**
+     * @inheritDoc
+     * @return static
+     */
+    public function header($headersOrKeyOrClosure, string $value = null): GuzzleWrapper
+    {
+        $firstParamType = gettype($headersOrKeyOrClosure);
+
+        switch ($firstParamType) {
+            case 'object':
+                if (is_callable($headersOrKeyOrClosure)) {
+                    $headerObj = new Header();
+                    $headersOrKeyOrClosure($headerObj);
+                    $options = array_merge(($this->options['headers'] ?? []), $headerObj->getOptions());
+                } else {
+                    $className = __CLASS__;
+                    $methodName = __METHOD__;
+                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                }
+                break;
+            case 'array':
+                $options = $headersOrKeyOrClosure;
+                break;
+            case 'string':
+                $options[$headersOrKeyOrClosure] = $value;
+                break;
+            default:
+                throw new InvalidArgumentException(
+                    "First parameter must be an object of \Guzwrap\Core\Header or an array of headers or name of header
+                ");
+        }
+
+        return $this->addOption('headers', $options);
     }
 }

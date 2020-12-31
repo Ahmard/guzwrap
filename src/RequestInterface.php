@@ -4,7 +4,6 @@
 namespace Guzwrap;
 
 
-use GuzzleHttp\Cookie\CookieJar;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Throwable;

@@ -2,6 +2,8 @@
 
 namespace Guzwrap\Core;
 
+use InvalidArgumentException;
+
 class File
 {
     protected array $options = array(
@@ -75,7 +77,7 @@ class File
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
-                    throw new \InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
                 }
                 break;
             case 'array':
@@ -85,7 +87,7 @@ class File
                 $options[$headersOrKeyOrClosure] = $value;
                 break;
             default:
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     "First parameter must be an object of \Guzwrap\Core\Header or an array of headers or name of header
                 ");
         }

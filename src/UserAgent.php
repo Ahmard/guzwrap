@@ -36,23 +36,6 @@ class UserAgent
         return $names;
     }
 
-    public function getFile(string $file): string
-    {
-        return "{$this->dirPath}{$file}.json";
-    }
-
-    /**
-     * Get browser useragent
-     * @param string $browser
-     * @return mixed
-     */
-    public function getAgents(string $browser)
-    {
-        $uaFile = $this->getFile($browser);
-        $jsonUA = (string)file_get_contents($uaFile);
-        return json_decode($jsonUA);
-    }
-
     public function get(string $browser = 'chrome', string $chosen = null): string
     {
         $userAgents = $this->getAgents($browser);
@@ -90,5 +73,22 @@ class UserAgent
         }
 
         return $ua;
+    }
+
+    /**
+     * Get browser useragent
+     * @param string $browser
+     * @return mixed
+     */
+    public function getAgents(string $browser)
+    {
+        $uaFile = $this->getFile($browser);
+        $jsonUA = (string)file_get_contents($uaFile);
+        return json_decode($jsonUA);
+    }
+
+    public function getFile(string $file): string
+    {
+        return "{$this->dirPath}{$file}.json";
     }
 }

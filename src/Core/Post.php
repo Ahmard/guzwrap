@@ -2,6 +2,8 @@
 
 namespace Guzwrap\Core;
 
+use InvalidArgumentException;
+
 class Post
 {
     protected array $options = array();
@@ -29,7 +31,7 @@ class Post
      */
     public function field($name, string $value = null): self
     {
-        if (is_array($name)){
+        if (is_array($name)) {
             $this->formParams['form_params'] = array_merge($this->formParams['form_params'], $name);
             return $this;
         }
@@ -51,14 +53,14 @@ class Post
         $options = [];
         switch (gettype($fileOrKeyOrClosure)) {
             case 'object':
-                if (is_callable($fileOrKeyOrClosure)){
+                if (is_callable($fileOrKeyOrClosure)) {
                     $fileObj = new File();
                     $fileOrKeyOrClosure($fileObj);
                     $options = $fileObj->getOptions();
-                }else{
+                } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
-                    throw new \InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
                 }
                 break;
             case 'array':

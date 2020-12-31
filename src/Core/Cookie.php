@@ -2,7 +2,6 @@
 
 namespace Guzwrap\Core;
 
-use Guzwrap\RequestInterface;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\FileCookieJar;
 use GuzzleHttp\Cookie\SessionCookieJar;
@@ -22,7 +21,7 @@ trait Cookie
      * @param CookieJar|null $jar
      * @return static
      */
-    public function withCookie(?CookieJar $jar = null)
+    public function withCookie(?CookieJar $jar = null): Cookie
     {
         if ($jar == null) {
             $jar = new CookieJar();
