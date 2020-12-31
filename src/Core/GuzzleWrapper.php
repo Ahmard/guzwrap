@@ -29,6 +29,18 @@ class GuzzleWrapper implements RequestInterface
 
     protected array $oneTimedOption = array();
 
+
+    /**
+     * Merge an array of request data with provided one
+     * @param array $options
+     * @return static
+     */
+    public function useRequestData(array $options): GuzzleWrapper
+    {
+        $this->options = array_merge($this->options, $options);
+        return $this;
+    }
+
     /**
      * @inheritDoc
      * @return static
@@ -93,7 +105,11 @@ class GuzzleWrapper implements RequestInterface
             $this->getCookieOptions()
         );
 
-        $options['the_url'] = $options[0] ?? $this->url;
+        if (isset($options[0])){
+            $options['the_url'] = $options[0];
+        }elseif (isset($this->url)){
+            $options['the_url'] = $this->url;
+        }
         // unset($options[0]);
 
         /**
@@ -125,6 +141,10 @@ class GuzzleWrapper implements RequestInterface
     {
         $options = $this->getRequestData();
         $client = new Client($options);
+
+        if (!$options['the_url']){
+            throw new InvalidArgumentException('You cannot send request without providing request url.');
+        }
 
         return $client->request(
             $this->requestType,
