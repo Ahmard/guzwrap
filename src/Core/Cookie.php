@@ -21,7 +21,7 @@ trait Cookie
      * @param CookieJar|null $jar
      * @return static
      */
-    public function withCookie(?CookieJar $jar = null): Cookie
+    public function withCookie(?CookieJar $jar = null): GuzzleWrapper
     {
         if ($jar == null) {
             $jar = new CookieJar();

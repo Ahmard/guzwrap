@@ -29,7 +29,7 @@ interface RequestInterface
     /**
      * Get generated request data
      * this data can be passed to guzzle directly
-     * @return string[]
+     * @return mixed[]
      */
     public function getRequestData(): array;
 
@@ -53,7 +53,7 @@ interface RequestInterface
      * @param string|null $chosen
      * @return RequestInterface
      */
-    public function userAgent(string $userAgent, string $chosen = null): RequestInterface;
+    public function userAgent(string $userAgent, ?string $chosen = null): RequestInterface;
 
     /**
      * Describes the redirect behavior of a request.
@@ -82,7 +82,7 @@ interface RequestInterface
      * @param string|null $type
      * @return RequestInterface
      */
-    public function auth($optionOrUsername, string $typeOrPassword = null, string $type = null): RequestInterface;
+    public function auth($optionOrUsername, ?string $typeOrPassword = null, ?string $type = null): RequestInterface;
 
     /**
      * The body option is used to control the body of an entity enclosing request (e.g., PUT, POST, PATCH).
@@ -101,7 +101,7 @@ interface RequestInterface
      * @param string|null $password
      * @return RequestInterface
      */
-    public function cert($optionOrFile, string $password = null): RequestInterface;
+    public function cert($optionOrFile, ?string $password = null): RequestInterface;
 
     /**
      * Float describing the number of seconds to wait while trying to connect to a server.
@@ -171,7 +171,7 @@ interface RequestInterface
      * @param string|null $value
      * @return RequestInterface
      */
-    public function header($headersOrKeyOrClosure, string $value = null): RequestInterface;
+    public function header($headersOrKeyOrClosure, ?string $value = null): RequestInterface;
 
     /**
      * Set to false to disable throwing exceptions on an HTTP protocol errors (i.e., 4xx and 5xx responses).
@@ -250,7 +250,7 @@ interface RequestInterface
      * @param string|null $queryValue
      * @return RequestInterface
      */
-    public function query($queriesOrName, string $queryValue = null): RequestInterface;
+    public function query($queriesOrName, ?string $queryValue = null): RequestInterface;
 
     /**
      * Float describing the timeout to use when reading a streamed body
@@ -282,10 +282,10 @@ interface RequestInterface
      * SSL key in the first array element followed by the password required for the certificate in the second element.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#ssl-key
      * @param string|array $fileOrPassword
-     * @param null $password
+     * @param string|null $password
      * @return RequestInterface
      */
-    public function sslKey($fileOrPassword, $password = null): RequestInterface;
+    public function sslKey($fileOrPassword, ?string $password = null): RequestInterface;
 
     /**
      * Set to true to stream a response rather than download it all up-front.

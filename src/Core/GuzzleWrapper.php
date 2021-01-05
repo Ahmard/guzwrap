@@ -26,16 +26,6 @@ class GuzzleWrapper implements RequestInterface
     private string $url;
     private string $requestType;
 
-    /**
-     * Merge an array of request data with provided one
-     * @param array $options
-     * @return static
-     */
-    public function useRequestData(array $options): GuzzleWrapper
-    {
-        $this->options = array_merge($this->options, $options);
-        return $this;
-    }
 
     /**
      * @inheritDoc
@@ -76,6 +66,13 @@ class GuzzleWrapper implements RequestInterface
     public function exec(): ResponseInterface
     {
         $options = $this->getRequestData();
+
+        $options['headers'] ??= [];
+        if (!array_key_exists('user-agent', $options['headers'])) {
+            $options['headers']['user-agent'] = UserAgent::init()->getRandom();
+        }
+
+        //Create guzzle client
         $client = new Client($options);
 
         if (!$options['the_url']) {
@@ -105,7 +102,9 @@ class GuzzleWrapper implements RequestInterface
             $options['the_url'] = $this->url;
         }
         //Set request method
-        $options['method'] = $this->requestType;
+        if (isset($this->requestType)) {
+            $options['method'] = $this->requestType;
+        }
 
         // unset($options[0]);
 
@@ -132,6 +131,17 @@ class GuzzleWrapper implements RequestInterface
     }
 
     /**
+     * Merge an array of request data with provided one
+     * @param array $options
+     * @return static
+     */
+    public function useRequestData(array $options): GuzzleWrapper
+    {
+        $this->options = array_merge($this->options, $options);
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      * @return static
      */
@@ -145,13 +155,14 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function userAgent(string $userAgent, string $chosen = null): GuzzleWrapper
+    public function userAgent(string $userAgent, ?string $chosen = null): GuzzleWrapper
     {
         if ($chosen || strlen($userAgent) < 8) {
-            $userAgent = (new UserAgent)->get($userAgent, $chosen);
+            $userAgent = UserAgent::init()->get($userAgent, $chosen);
         }
+
         $this->addOption('headers', array_merge(
-            $this->options['headers'],
+            $this->options['headers'] ??= [],
             ['user-agent' => $userAgent]
         ));
         return $this;

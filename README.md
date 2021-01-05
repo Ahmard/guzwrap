@@ -1,18 +1,11 @@
 Guzwrap, PHP GuzzleHttp Wrapper.
 ==============================================
 
-Guzwrap is a wrapper that provides easy helper functions
-around PHP popular web client library, GuzzleHttp.
+Guzwrap is a wrapper that provides easy helper functions around PHP popular web client library, GuzzleHttp.
 
 # Installation
 
-Make sure that you have composer installed
-[Composer](http://getcomposer.org).
-
-If you don't have Composer run the below command
-```bash
-curl -sS https://getcomposer.org/installer | php
-```
+Make sure that you have [Composer](http://getcomposer.org) installed .
 
 Now, let's install Guzwrap:
 
@@ -27,42 +20,53 @@ require 'vendor/autoload.php';
 ```
 
 # Usage
+
 ```php
 use Guzwrap\Request;
 
 //simple request
-$result = Request::get($url)->exec();
+$result = Request::get('http://localhost:8002')->exec();
 
 //with authentication
-Request::get($url)
+Request::get('http://localhost:8002')
     ->auth('username', 'password')
     ->exec();
 ```
 
 - get Guzwrap Instance
+
 ```php
+use Guzwrap\Request;
+
 $instance = Request::getInstance();
 //Do something...
 ```
 
 - Request with cookies
+
 ```php
-Request::get($url)
+use Guzwrap\Request;
+
+Request::get('http://localhost:8002')
     ->withCookie()
     //or use cookie file
-    ->withCookieFile($fileLocatiom)
+    ->withCookieFile('path/to/file')
     //use cookie session
-    ->withCookieSession($name)
+    ->withCookieSession('session_name')
     //use array too
     ->withCookieArray([
-        'first_name' => 'Jane'
+        'first_name' => 'Jane',
         'other_names' => 'Doe'
-    ])->exec();
+    ], 'localhost')
+    ->exec();
 ```
 
 - Handle redirects
+
 ```php
-Request::get($url)
+use Guzwrap\Request;
+
+Request::get('http://localhost:8002')
     ->redirects(function($wrp){
         $wrp->max(5);
         $wrp->strict();
@@ -76,35 +80,51 @@ Request::get($url)
 ```
 
 - Headers
+
 ```php
-Request::get($url)->header(function($h){
-    $h->add('hello', 'world');
-    $h->add('planet', 'earth');
-})->exec();
+use Guzwrap\Request;
+
+Request::get('http://localhost:8002')
+    ->header(function($h){
+        $h->add('hello', 'world');
+        $h->add('planet', 'earth');
+    })
+    ->exec();
 ```
 
 - Query
+
 ```php
+use Guzwrap\Request;
+
 Request::get('https://google.com')
     ->query('q', 'Who is jane doe')
     ->exec();
 ```
 
 - Post form data
+
 ```php
-Request::url($url)->post(function($req){
-    $req->field('first_name', 'Jane');
-    $req->field('last_name', 'Doe');
-})->exec();
+use Guzwrap\Core\File;
+use Guzwrap\Request;
+
+Request::url('http://localhost:8002')
+    ->post(function($req){
+        $req->field('first_name', 'Jane');
+        $req->field('last_name', 'Doe');
+    })
+    ->exec();
+
 //Post with multipart data
-Request::url($url)->post(function($req){
+Request::url('http://localhost:8002')->post(function($req){
     $req->field('full_name', 'Jane Doe');
     $req->file('avatar', 'C:\jane_doe.jpg');
 })->exec();
-//Alter file data
-Request::url($url)->post(function($req){
+
+//Send file with custom information
+Request::url('http://localhost:8002')->post(function($req){
     $req->field('full_name', 'Jane Doe');
-    $req->file(function(){
+    $req->file(function(File $file){
         $file->field('avatar');
         $file->path('C:\jane_doe.jpg');
         $file->name('John_doe.gif');
@@ -112,18 +132,41 @@ Request::url($url)->post(function($req){
 })->exec();
 ```
 
-- UserAgent
-We provide custom useragents to help send request easily.
+### UserAgent 
+  We provide custom user agents to help send request easily.
+
 ```php
-Request::userAgent('chrome');
+use Guzwrap\Request;
+use Guzwrap\UserAgent;
+
+Request::userAgent(UserAgent::CHROME);
+
 //Choose specific useragent index from array
-Request::userAgent('chrome', '1');
+Request::userAgent(UserAgent::CHROME, '1');
+
 //Choose sub-useragent
-Request::userAgent('chrome', '9.1');
+Request::userAgent(UserAgent::CHROME, '9.1');
 ```
 
-- List useragents
+- List user agents
+
 ```php
 use Guzwrap\UserAgent;
-$userAgents = (new UserAgent())->getAvailable();
+
+$userAgents = UserAgent::init()->getAvailable();
+```
+
+- Get random user agent
+```php
+use Guzwrap\UserAgent;
+
+$randomUA = UserAgent::init()->getRandom();
+```
+
+- Add user agents to the collection. <br/>
+  Please take a look at user agent [definition sample](/src/data/ua/chrome.json)
+```php
+use Guzwrap\UserAgent;
+
+UserAgent::init()->addFile('/path/to/user-agents.json');
 ```

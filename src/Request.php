@@ -7,11 +7,12 @@ use Guzwrap\Core\GuzzleWrapper;
 /**
  * Class Request
  * @package Guzwrap
+ * @method static GuzzleWrapper useRequestData(array $requestData) Merge an array of request data with provided one
  * @method static GuzzleWrapper addOption(string $name, mixed $value) Add option to this request
  * @method static GuzzleWrapper request(string $type, mixed $argsOrClosure) Make http request
  * @method static GuzzleWrapper exec() Execute the request
  * @method static GuzzleWrapper url(string $url) Set request url
- * @method static GuzzleWrapper userAgent(string $userAgent, $chosen) Choose user agent
+ * @method static GuzzleWrapper userAgent(string $userAgent, ?string $chosen = null) Choose user agent
  * @method static GuzzleWrapper allowRedirects($options) Describes the redirect behavior of a request.
  * @method static GuzzleWrapper redirects(callable $callback) Set redirect handler
  * @method static GuzzleWrapper auth($optionOrUsername, $typeOrPassword, $type) Set request authentication credentials
