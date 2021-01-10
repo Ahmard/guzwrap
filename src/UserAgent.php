@@ -22,8 +22,15 @@ class UserAgent
 
     protected array $uaFiles = [];
 
-    public function __construct()
+    protected string $rawUserAgent;
+
+
+    public function __construct(array $data = [])
     {
+        if (isset($data['raw'])) {
+            $this->rawUserAgent = $data['raw'];
+        }
+
         array_push($this->directoryPaths, __DIR__ . '/data/ua/');
         $this->traverseDirs($this->directoryPaths);
     }
@@ -47,9 +54,21 @@ class UserAgent
         ];
     }
 
-    public static function init(): UserAgent
+    /**
+     * Use your custom user agent
+     * @param string $rawUserAgent
+     * @return UserAgent
+     */
+    public static function raw(string $rawUserAgent): UserAgent
     {
-        return new UserAgent();
+        return UserAgent::init([
+            'raw' => $rawUserAgent,
+        ]);
+    }
+
+    public static function init(array $data = []): UserAgent
+    {
+        return new UserAgent($data);
     }
 
     /**
@@ -63,6 +82,15 @@ class UserAgent
         }
 
         $this->addToUAList(new SplFileInfo($filePath));
+    }
+
+    /**
+     * Gets defined user agent
+     * @return string
+     */
+    public function getRaw(): string
+    {
+        return $this->rawUserAgent;
     }
 
     /**

@@ -27,6 +27,20 @@ interface RequestInterface
     public function request(string $type, ...$argsOrClosure): RequestInterface;
 
     /**
+     * Use request data and construct new request with it
+     * @param RequestInterface ...$request
+     * @return RequestInterface
+     */
+    public function useRequest(RequestInterface ...$request): RequestInterface;
+
+    /**
+     * Merge an array of request data with provided one
+     * @param array $options
+     * @return RequestInterface
+     */
+    public function useRequestData(array $options): RequestInterface;
+
+    /**
      * Get generated request data
      * this data can be passed to guzzle directly
      * @return mixed[]
@@ -49,11 +63,11 @@ interface RequestInterface
 
     /**
      * Choose user agent
-     * @param string $userAgent
+     * @param string|UserAgent $userAgent
      * @param string|null $chosen
      * @return RequestInterface
      */
-    public function userAgent(string $userAgent, ?string $chosen = null): RequestInterface;
+    public function userAgent($userAgent, ?string $chosen = null): RequestInterface;
 
     /**
      * Describes the redirect behavior of a request.
@@ -167,7 +181,7 @@ interface RequestInterface
      * Associative array of headers to add to the request.
      * Each key is the name of a header, and each value is a string or array of strings representing the header field values.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#headers
-     * @param string|array $headersOrKeyOrClosure
+     * @param string|array|callable $headersOrKeyOrClosure
      * @param string|null $value
      * @return RequestInterface
      */

@@ -3,10 +3,12 @@
 namespace Guzwrap;
 
 use Guzwrap\Core\GuzzleWrapper;
+use GuzzleHttp\Cookie\CookieJar;
 
 /**
  * Class Request
  * @package Guzwrap
+ * @method static GuzzleWrapper useRequest(RequestInterface ...$requests) Merge an array of request data with provided one
  * @method static GuzzleWrapper useRequestData(array $requestData) Merge an array of request data with provided one
  * @method static GuzzleWrapper addOption(string $name, mixed $value) Add option to this request
  * @method static GuzzleWrapper request(string $type, mixed $argsOrClosure) Make http request
@@ -20,21 +22,21 @@ use Guzwrap\Core\GuzzleWrapper;
  * @method static GuzzleWrapper cert($optionOrFile, $password) Set certificate
  * @method static GuzzleWrapper connectTimeout($seconds) Set connection timeout
  * @method static GuzzleWrapper debug(bool $bool) Whether to display debug information
- * @method static GuzzleWrapper decodeContent($bool) Decode content
+ * @method static GuzzleWrapper decodeContent(bool $bool) Decode content
  * @method static GuzzleWrapper delay(float $delay) Set delay to a request
  * @method static GuzzleWrapper expect($expect) Set expect value
  * @method static GuzzleWrapper forceIPResolve($version) Force to resolve ip address
- * @method static GuzzleWrapper formParams($params) Set request form parameters
+ * @method static GuzzleWrapper formParams(array $params) Set request form parameters
  * @method static GuzzleWrapper header($headersOrKeyOrClosure, $value) Set request headers
- * @method static GuzzleWrapper httpErrors($bool) Request http erros
+ * @method static GuzzleWrapper httpErrors($bool) Request http errors
  * @method static GuzzleWrapper idnConversion($bool) IDN Conversion
- * @method static GuzzleWrapper json($json) Mark request's content-type as json
- * @method static GuzzleWrapper multipart($data) Set request as multipart
+ * @method static GuzzleWrapper json(string $json) Mark request's content-type as json
+ * @method static GuzzleWrapper multipart(array $data) Set request as multipart
  * @method static GuzzleWrapper onHeaders(callable $callback) Listen to headers event
  * @method static GuzzleWrapper onStats(callable $callback) Listen to stats event
  * @method static GuzzleWrapper progress(callable $callback) Monitor request progress
- * @method static GuzzleWrapper proxy($url) Set request proxy url
- * @method static GuzzleWrapper query($queries) Url queries
+ * @method static GuzzleWrapper proxy(string $url) Set request proxy url
+ * @method static GuzzleWrapper query(mixed $queriesOrName, ?string $queryValue = null) Url queries
  * @method static GuzzleWrapper readTimeout(float $seconds) Set read timeout
  * @method static GuzzleWrapper sink(string $file) Save request response body to file
  * @method static GuzzleWrapper saveTo(resource $stream) Save request response body to file
@@ -44,10 +46,10 @@ use Guzwrap\Core\GuzzleWrapper;
  * @method static GuzzleWrapper verify($verify) Request verification
  * @method static GuzzleWrapper timeout(float $seconds) Set request timeout
  * @method static GuzzleWrapper version(string $version) Set request version
- * @method static GuzzleWrapper withCookie($jar) Use cookie provided by guzzle
- * @method static GuzzleWrapper withCookieFile($file) Send request with cookie from file and stored to file
+ * @method static GuzzleWrapper withCookie(?CookieJar $cookie) Use cookie provided by guzzle
+ * @method static GuzzleWrapper withCookieFile(string $file) Send request with cookie from file and stored to file
  * @method static GuzzleWrapper withCookieSession(string $name) Send request with cookie session
- * @method static GuzzleWrapper withCookieArray($cookies, $domain) If user have cookie in hand
+ * @method static GuzzleWrapper withCookieArray(array $cookies, string $domain) If user have cookie in hand
  * @method static GuzzleWrapper get(string $url) Send GET request
  * @method static GuzzleWrapper head(string $url) Send HEAD request
  * @method static GuzzleWrapper post($urlOrClosure) Send POST request

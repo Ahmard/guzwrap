@@ -1,22 +1,17 @@
 Guzwrap, PHP GuzzleHttp Wrapper.
 ==============================================
 
-Guzwrap is a wrapper that provides easy helper functions around PHP popular web client library, GuzzleHttp.
+Guzwrap is an object-oriented wrapper around [GuzzleHttp](http://guzzlephp.org/). <br/>
+This project is founded to make sending request with Guzzle easier.
 
 # Installation
 
-Make sure that you have [Composer](http://getcomposer.org) installed .
+Make sure you have [Composer](http://getcomposer.org) installed .
 
 Now, let's install Guzwrap:
 
 ```bash
 composer require ahmard/guzwrap
-```
-
-After installing, require Composer's autoloader in your code:
-
-```php
-require 'vendor/autoload.php';
 ```
 
 # Usage
@@ -132,8 +127,54 @@ Request::url('http://localhost:8002')->post(function($req){
 })->exec();
 ```
 
-### UserAgent 
-  We provide custom user agents to help send request easily.
+### More _Request_ usage
+
+- Use request data
+
+```php
+use Guzwrap\Request;
+use Guzwrap\UserAgent;
+
+//Basic usage
+$request = Request::query('artist', 'Taylor Swift')
+    ->useRequestData([
+        'headers' => [
+            'pass' => 'my-random-pass',
+            'user-agent' => 'My Custom Useragent',
+        ],
+        'query' => [
+            'action' => 'create'
+        ]       
+    ])->exec();
+
+//User other request's data
+$request1 = Request::userAgent(UserAgent::FIREFOX)
+    ->query([
+        'username' => 'Ahmard',
+        'realm' => 'admin'
+    ]);
+
+$realRequest = Request::useRequestData($request1->getRequestData());
+```
+
+- Use request object
+
+```php
+use Guzwrap\Request;
+use Guzwrap\UserAgent;
+
+$request1 = Request::query('username', 'Ahmard');
+
+$request2 = Request::query('language', 'PHP')
+    ->userAgent(UserAgent::CHROME)
+    ->allowRedirects(false);
+
+$realRequest = Request::useRequest($request1, $request2); //Has request 1 and request 2 data
+```
+
+### UserAgent
+
+We provide custom user agents to help send request easily.
 
 ```php
 use Guzwrap\Request;
@@ -157,6 +198,7 @@ $userAgents = UserAgent::init()->getAvailable();
 ```
 
 - Get random user agent
+
 ```php
 use Guzwrap\UserAgent;
 
@@ -165,8 +207,23 @@ $randomUA = UserAgent::init()->getRandom();
 
 - Add user agents to the collection. <br/>
   Please take a look at user agent [definition sample](/src/data/ua/chrome.json)
+
 ```php
 use Guzwrap\UserAgent;
 
 UserAgent::init()->addFile('/path/to/user-agents.json');
 ```
+
+- Use raw user agent<br/>
+  Note that you can only pass Guzwrap\UserAgent class to the request object if you want use custom user agent, nothing
+  more. <br/>
+  This may open door to other possibilities in the future.
+
+```php
+use Guzwrap\UserAgent;
+use Guzwrap\Request;
+
+$request = Request::userAgent(UserAgent::raw('Browser 1.0 (Windows NT 10.0; Win64; x64)'));
+```
+
+**Enjoy 😊**

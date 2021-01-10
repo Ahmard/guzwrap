@@ -2,6 +2,9 @@
 
 namespace Guzwrap\Core;
 
+/**
+ * @internal for internal use only
+ */
 trait RequestMethods
 {
     /**

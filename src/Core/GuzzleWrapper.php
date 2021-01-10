@@ -23,9 +23,12 @@ class GuzzleWrapper implements RequestInterface
      */
     protected array $options = array();
     protected array $oneTimedOption = array();
+    /**
+     * @var RequestInterface[]
+     */
+    protected array $requestsToBeUsed = [];
     private string $url;
     private string $requestType;
-
 
     /**
      * @inheritDoc
@@ -91,6 +94,13 @@ class GuzzleWrapper implements RequestInterface
      */
     public function getRequestData(): array
     {
+        //Merge used request data if any is used
+        if (!empty($this->requestsToBeUsed)) {
+            foreach ($this->requestsToBeUsed as $request) {
+                $this->useRequestData($request->getRequestData());
+            }
+        }
+
         $options = array_merge(
             $this->options,
             $this->getCookieOptions()
@@ -131,13 +141,20 @@ class GuzzleWrapper implements RequestInterface
     }
 
     /**
-     * Merge an array of request data with provided one
-     * @param array $options
-     * @return static
+     * @inheritDoc
      */
     public function useRequestData(array $options): GuzzleWrapper
     {
-        $this->options = array_merge($this->options, $options);
+        $this->options = array_merge_recursive($this->options, $options);
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function useRequest(RequestInterface ...$request): GuzzleWrapper
+    {
+        $this->requestsToBeUsed = $request;
         return $this;
     }
 
@@ -155,9 +172,14 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function userAgent(string $userAgent, ?string $chosen = null): GuzzleWrapper
+    public function userAgent($userAgent, ?string $chosen = null): GuzzleWrapper
     {
-        if ($chosen || strlen($userAgent) < 8) {
+        //If instance user agent is ued
+        if ($userAgent instanceof UserAgent) {
+            $userAgent = $userAgent->getRaw();
+        }
+
+        if (!$userAgent && ($chosen || strlen($userAgent) < 8)) {
             $userAgent = UserAgent::init()->get($userAgent, $chosen);
         }
 
