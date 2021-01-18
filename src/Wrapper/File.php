@@ -1,16 +1,16 @@
 <?php
 
-namespace Guzwrap\Core;
+namespace Guzwrap\Wrapper;
 
 use InvalidArgumentException;
 
 class File
 {
-    protected array $options = array(
+    protected array $values = array(
         'headers' => []
     );
 
-    protected array $formOptions = array();
+    protected array $formValues = array();
 
     protected ?string $filePath = null;
 
@@ -21,7 +21,7 @@ class File
      */
     public function field(string $name): File
     {
-        $this->formOptions['name'] = $name;
+        $this->formValues['name'] = $name;
         return $this;
     }
 
@@ -33,7 +33,7 @@ class File
     public function path(string $filePath): File
     {
         $this->filePath = $filePath;
-        $this->formOptions['contents'] = fopen($filePath, 'r');
+        $this->formValues['contents'] = fopen($filePath, 'r');
         return $this;
     }
 
@@ -45,7 +45,7 @@ class File
      */
     public function resource($resource): File
     {
-        $this->formOptions['contents'] = $resource;
+        $this->formValues['contents'] = $resource;
         return $this;
     }
 
@@ -56,7 +56,7 @@ class File
      */
     public function name(string $filename): File
     {
-        $this->formOptions['filename'] = $filename;
+        $this->formValues['filename'] = $filename;
         return $this;
     }
 
@@ -73,7 +73,7 @@ class File
                 if (is_callable($headersOrKeyOrClosure)) {
                     $headerObj = new Header();
                     $headersOrKeyOrClosure($headerObj);
-                    $options = array_merge($this->options['headers'], $headerObj->getOptions());
+                    $options = array_merge($this->values['headers'], $headerObj->getOptions());
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
@@ -92,19 +92,19 @@ class File
                 ");
         }
 
-        $this->options['headers'] = array_merge(
-            $this->options['headers'],
+        $this->values['headers'] = array_merge(
+            $this->values['headers'],
             $options
         );
 
         return $this;
     }
 
-    public function getOptions(): array
+    public function getValues(): array
     {
         return array_merge(
-            $this->formOptions,
-            $this->options
+            $this->formValues,
+            $this->values
         );
     }
 }

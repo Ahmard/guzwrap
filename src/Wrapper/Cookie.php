@@ -1,7 +1,8 @@
 <?php
 
-namespace Guzwrap\Core;
+namespace Guzwrap\Wrapper;
 
+use Guzwrap\RequestInterface;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\FileCookieJar;
 use GuzzleHttp\Cookie\SessionCookieJar;
@@ -17,11 +18,10 @@ trait Cookie
 
 
     /**
-     * Use cookie provided by guzzle
-     * @param CookieJar|null $jar
+     * @inheritDoc
      * @return static
      */
-    public function withCookie(?CookieJar $jar = null): GuzzleWrapper
+    public function withCookie(?CookieJar $jar = null): RequestInterface
     {
         if ($jar == null) {
             $jar = new CookieJar();
@@ -32,11 +32,10 @@ trait Cookie
     }
 
     /**
-     * Send request with cookie from file and stored to file
-     * @param string $file 'file location/filename'
+     * @inheritDoc
      * @return static
      */
-    public function withCookieFile(string $file): GuzzleWrapper
+    public function withCookieFile(string $file): RequestInterface
     {
         $jar = new FileCookieJar($file);
         $this->userCookieChoice = $jar;
@@ -44,11 +43,10 @@ trait Cookie
     }
 
     /**
-     * Send request with cookie session
-     * @param string $name
+     * @inheritDoc
      * @return static
      */
-    public function withCookieSession(string $name): GuzzleWrapper
+    public function withCookieSession(string $name): RequestInterface
     {
         $jar = new SessionCookieJar($name, true);
         $this->willUseCookieSession = $jar;
@@ -56,12 +54,10 @@ trait Cookie
     }
 
     /**
-     * Send request with an array of cookies
-     * @param array $cookies cookie list
-     * @param string $domain
+     * @inheritDoc
      * @return static
      */
-    public function withCookieArray(array $cookies, string $domain): GuzzleWrapper
+    public function withCookieArray(array $cookies, string $domain): RequestInterface
     {
         $jar = CookieJar::fromArray($cookies, $domain);
         $this->userCookieChoice = $jar;

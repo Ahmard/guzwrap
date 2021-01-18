@@ -100,7 +100,7 @@ Request::get('https://google.com')
 - Post form data
 
 ```php
-use Guzwrap\Core\File;
+use Guzwrap\Wrapper\File;
 use Guzwrap\Request;
 
 Request::url('http://localhost:8002')

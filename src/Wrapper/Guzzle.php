@@ -1,6 +1,7 @@
 <?php
+declare(strict_types = 1);
 
-namespace Guzwrap\Core;
+namespace Guzwrap\Wrapper;
 
 use Guzwrap\RequestInterface;
 use Guzwrap\UserAgent;
@@ -9,7 +10,7 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
-class GuzzleWrapper implements RequestInterface
+class Guzzle implements RequestInterface
 {
     //Import cookie handler
     use Cookie;
@@ -21,7 +22,7 @@ class GuzzleWrapper implements RequestInterface
      * Guzzle request options
      * @var array
      */
-    protected array $options = array();
+    protected array $values = array();
     protected array $oneTimedOption = array();
     /**
      * @var RequestInterface[]
@@ -34,14 +35,14 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function request(string $type, ...$argsOrClosure): GuzzleWrapper
+    public function request(string $type, ...$argsOrClosure): Guzzle
     {
         if ($type == 'POST') {
             if (gettype($argsOrClosure[0]) == 'object') {
-                $post = new Post();
+                $post = new Form();
                 $argsOrClosure[0]($post);
                 //let the $argsOrClosure hold the retrieved options
-                $argsOrClosure = $post->getOptions();
+                $argsOrClosure = $post->getValues();
                 //If url from post method is used
                 if (isset($argsOrClosure['url'])) {
                     $this->url = $argsOrClosure['url'];
@@ -55,8 +56,8 @@ class GuzzleWrapper implements RequestInterface
         }
 
         $this->requestType = $type;
-        $this->options = array_merge(
-            $this->options,
+        $this->values = array_merge(
+            $this->values,
             ($argsOrClosure ?? [])
         );
 
@@ -102,7 +103,7 @@ class GuzzleWrapper implements RequestInterface
         }
 
         $options = array_merge(
-            $this->options,
+            $this->values,
             $this->getCookieOptions()
         );
 
@@ -143,16 +144,16 @@ class GuzzleWrapper implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function useRequestData(array $options): GuzzleWrapper
+    public function useRequestData(array $options): Guzzle
     {
-        $this->options = array_merge_recursive($this->options, $options);
+        $this->values = array_merge_recursive($this->values, $options);
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function useRequest(RequestInterface ...$request): GuzzleWrapper
+    public function useRequest(RequestInterface ...$request): Guzzle
     {
         $this->requestsToBeUsed = $request;
         return $this;
@@ -162,7 +163,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function url(string $url): GuzzleWrapper
+    public function url(string $url): Guzzle
     {
         $this->url = $url;
         return $this;
@@ -172,7 +173,32 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function userAgent($userAgent, ?string $chosen = null): GuzzleWrapper
+    public function form($callback): Guzzle
+    {
+        if (is_callable($callback)){
+            $form = new Form();
+            $callback($form);
+            $values = $form->getValues();
+        }
+
+        if (!isset($values)){
+            $values = $callback->getValues();
+        }
+
+        if (isset($values['url'])){
+            $this->url($values['url']);
+            unset($values['url']);
+        }
+
+        $this->values = array_merge($this->values, $values);
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     * @return static
+     */
+    public function userAgent($userAgent, ?string $chosen = null): Guzzle
     {
         //If instance user agent is ued
         if ($userAgent instanceof UserAgent) {
@@ -184,7 +210,7 @@ class GuzzleWrapper implements RequestInterface
         }
 
         $this->addOption('headers', array_merge(
-            $this->options['headers'] ??= [],
+            $this->values['headers'] ??= [],
             ['user-agent' => $userAgent]
         ));
         return $this;
@@ -194,17 +220,17 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function addOption(string $name, $value): GuzzleWrapper
+    public function addOption(string $name, $value): Guzzle
     {
         if (is_array($value)) {
             $value = array_merge(
-                ($this->options[$name] ?? []),
+                ($this->values[$name] ?? []),
                 $value
             );
         }
 
-        $this->options = array_merge(
-            $this->options,
+        $this->values = array_merge(
+            $this->values,
             [$name => $value]
         );
 
@@ -215,7 +241,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function allowRedirects(bool $options = true): GuzzleWrapper
+    public function allowRedirects(bool $options = true): Guzzle
     {
         return $this->addOption('allow_redirects', $options);
     }
@@ -224,7 +250,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function redirects(callable $callback): GuzzleWrapper
+    public function redirects(callable $callback): Guzzle
     {
         $redirectObject = new Redirect();
         $callback($redirectObject);
@@ -236,7 +262,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function auth($optionOrUsername, string $typeOrPassword = null, string $type = null): GuzzleWrapper
+    public function auth($optionOrUsername, string $typeOrPassword = null, string $type = null): Guzzle
     {
         $option = $optionOrUsername;
         if (!is_array($optionOrUsername)) {
@@ -256,7 +282,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function body($body): GuzzleWrapper
+    public function body($body): Guzzle
     {
         return $this->addOption('body', $body);
     }
@@ -265,7 +291,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function cert($optionOrFile, string $password = null): GuzzleWrapper
+    public function cert($optionOrFile, string $password = null): Guzzle
     {
         $option = $optionOrFile;
         if (!is_array($optionOrFile)) {
@@ -281,7 +307,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function connectTimeout(float $seconds): GuzzleWrapper
+    public function connectTimeout(float $seconds): Guzzle
     {
         return $this->addOption('connect_timeout', $seconds);
     }
@@ -290,7 +316,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function debug(bool $bool = true): GuzzleWrapper
+    public function debug(bool $bool = true): Guzzle
     {
         return $this->addOption('debug', $bool);
     }
@@ -299,7 +325,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function decodeContent(bool $bool = true): GuzzleWrapper
+    public function decodeContent(bool $bool = true): Guzzle
     {
         return $this->addOption('decode_content', $bool);
     }
@@ -308,7 +334,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function delay(float $delay): GuzzleWrapper
+    public function delay(float $delay): Guzzle
     {
         return $this->addOption('delay', $delay);
     }
@@ -317,7 +343,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function expect($expect): GuzzleWrapper
+    public function expect($expect): Guzzle
     {
         return $this->addOption('expect', $expect);
     }
@@ -326,7 +352,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function forceIPResolve(string $version): GuzzleWrapper
+    public function forceIPResolve(string $version): Guzzle
     {
         return $this->addOption('force_ip_resolve', $version);
     }
@@ -335,7 +361,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function formParams(array $params): GuzzleWrapper
+    public function formParams(array $params): Guzzle
     {
         return $this->addOption('form_params', $params);
     }
@@ -344,7 +370,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function httpErrors(bool $bool = true): GuzzleWrapper
+    public function httpErrors(bool $bool = true): Guzzle
     {
         return $this->addOption('http_errors', $bool);
     }
@@ -353,7 +379,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function idnConversion(bool $bool = true): GuzzleWrapper
+    public function idnConversion(bool $bool = true): Guzzle
     {
         return $this->addOption('idn_conversion', $bool);
     }
@@ -362,7 +388,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function json(string $json): GuzzleWrapper
+    public function json(string $json): Guzzle
     {
         return $this->addOption('json', $json);
     }
@@ -371,7 +397,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function multipart(array $data): GuzzleWrapper
+    public function multipart(array $data): Guzzle
     {
         return $this->addOption('multipart', $data);
     }
@@ -380,7 +406,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function onHeaders(callable $callback): GuzzleWrapper
+    public function onHeaders(callable $callback): Guzzle
     {
         return $this->addOption('on_headers', $callback);
     }
@@ -389,7 +415,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function onStats(callable $callback): GuzzleWrapper
+    public function onStats(callable $callback): Guzzle
     {
         return $this->addOption('on_stats', $callback);
     }
@@ -398,7 +424,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function progress(callable $callback): GuzzleWrapper
+    public function progress(callable $callback): Guzzle
     {
         return $this->addOption('progress', $callback);
     }
@@ -407,7 +433,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function proxy(string $url): GuzzleWrapper
+    public function proxy(string $url): Guzzle
     {
         return $this->addOption('proxy', $url);
     }
@@ -417,7 +443,7 @@ class GuzzleWrapper implements RequestInterface
      * @return static
      * @return static
      */
-    public function query($queriesOrName, string $queryValue = null): GuzzleWrapper
+    public function query($queriesOrName, string $queryValue = null): Guzzle
     {
         if (is_string($queriesOrName)) {
             return $this->addOption('query', [$queriesOrName => $queryValue]);
@@ -430,7 +456,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function readTimeout(float $seconds): GuzzleWrapper
+    public function readTimeout(float $seconds): Guzzle
     {
         return $this->addOption('read_timeout', $seconds);
     }
@@ -439,7 +465,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function sink($file): GuzzleWrapper
+    public function sink($file): Guzzle
     {
         return $this->addOption('sink', $file);
     }
@@ -448,7 +474,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function saveTo(StreamInterface $stream): GuzzleWrapper
+    public function saveTo(StreamInterface $stream): Guzzle
     {
         return $this->addOption('save_to', $stream);
     }
@@ -457,7 +483,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function sslKey($fileOrPassword, $password = null): GuzzleWrapper
+    public function sslKey($fileOrPassword, $password = null): Guzzle
     {
         $option = array();
         if (!is_array($fileOrPassword)) {
@@ -473,7 +499,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function stream(bool $bool = true): GuzzleWrapper
+    public function stream(bool $bool = true): Guzzle
     {
         return $this->addOption('stream', $bool);
     }
@@ -482,7 +508,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function synchronous(bool $bool = true): GuzzleWrapper
+    public function synchronous(bool $bool = true): Guzzle
     {
         return $this->addOption('synchronous', $bool);
     }
@@ -491,7 +517,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function verify($verify): GuzzleWrapper
+    public function verify($verify): Guzzle
     {
         return $this->addOption('verify', $verify);
     }
@@ -500,7 +526,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function timeout(float $seconds): GuzzleWrapper
+    public function timeout(float $seconds): Guzzle
     {
         return $this->addOption('timeout', $seconds);
     }
@@ -509,7 +535,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function version(string $version): GuzzleWrapper
+    public function version(string $version): Guzzle
     {
         return $this->addOption('version', $version);
     }
@@ -518,7 +544,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function referer(string $refererUrl): GuzzleWrapper
+    public function referer(string $refererUrl): Guzzle
     {
         return $this->header('Referer', $refererUrl);
     }
@@ -527,7 +553,7 @@ class GuzzleWrapper implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function header($headersOrKeyOrClosure, string $value = null): GuzzleWrapper
+    public function header($headersOrKeyOrClosure, string $value = null): Guzzle
     {
         $firstParamType = gettype($headersOrKeyOrClosure);
 
@@ -536,7 +562,7 @@ class GuzzleWrapper implements RequestInterface
                 if (is_callable($headersOrKeyOrClosure)) {
                     $headerObj = new Header();
                     $headersOrKeyOrClosure($headerObj);
-                    $options = array_merge(($this->options['headers'] ?? []), $headerObj->getOptions());
+                    $options = array_merge(($this->values['headers'] ?? []), $headerObj->getOptions());
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;

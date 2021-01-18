@@ -1,6 +1,6 @@
 <?php
 
-namespace Guzwrap\Core;
+namespace Guzwrap\Wrapper;
 
 class Header
 {

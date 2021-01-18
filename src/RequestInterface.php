@@ -4,6 +4,8 @@
 namespace Guzwrap;
 
 
+use Guzwrap\Wrapper\Form;
+use GuzzleHttp\Cookie\CookieJar;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Throwable;
@@ -11,10 +13,102 @@ use Throwable;
 interface RequestInterface
 {
     /**
+     * Send GET request
+     * @param string $url
+     * @return $this
+     */
+    public function get(string $url): RequestInterface;
+
+    /**
+     * Send HEAD request
+     * @param string $url
+     * @return $this
+     */
+    public function head(string $url): RequestInterface;
+
+    /**
+     * Send POST request
+     * @param string|callable $urlOrClosure
+     * @return $this
+     */
+    public function post($urlOrClosure): RequestInterface;
+
+    /**
+     * Send http delete request
+     * @param string $url
+     * @return $this
+     */
+    public function delete(string $url): RequestInterface;
+
+    /**
+     * Send http connect request
+     * @param string $url
+     * @return $this
+     */
+    public function connect(string $url): RequestInterface;
+
+    /**
+     * Use cookie provided by guzzle
+     * @param CookieJar|null $jar
+     * @return RequestInterface
+     */
+    public function withCookie(?CookieJar $jar = null): RequestInterface;
+
+    /**
+     * Send request with cookie from file and stored to file
+     * @param string $file 'file location/filename'
+     * @return static
+     */
+    public function withCookieFile(string $file): RequestInterface;
+
+    /**
+     * Send request with cookie session
+     * @param string $name
+     * @return static
+     */
+    public function withCookieSession(string $name): RequestInterface;
+
+    /**
+     * Send request with an array of cookies
+     * @param array $cookies cookie list
+     * @param string $domain
+     * @return static
+     */
+    public function withCookieArray(array $cookies, string $domain): RequestInterface;
+
+    /**
+     * Send http options request
+     * @param string $url
+     * @return $this
+     */
+    public function options(string $url): RequestInterface;
+
+    /**
+     * Send http trace request
+     * @param string $url
+     * @return $this
+     */
+    public function trace(string $url): RequestInterface;
+
+    /**
+     * Send http patch request
+     * @param string $url
+     * @return $this
+     */
+    public function patch(string $url): RequestInterface;
+
+    /**
+     * Send http put request
+     * @param string $url
+     * @return $this
+     */
+    public function put(string $url): RequestInterface;
+
+    /**
      * Add option to this request
      * @param string $name
      * @param mixed $value
-     * @return RequestInterface
+     * @return $this
      */
     public function addOption(string $name, $value): RequestInterface;
 
@@ -22,21 +116,21 @@ interface RequestInterface
      * Make http request
      * @param string $type
      * @param mixed ...$argsOrClosure
-     * @return RequestInterface
+     * @return $this
      */
     public function request(string $type, ...$argsOrClosure): RequestInterface;
 
     /**
      * Use request data and construct new request with it
      * @param RequestInterface ...$request
-     * @return RequestInterface
+     * @return $this
      */
     public function useRequest(RequestInterface ...$request): RequestInterface;
 
     /**
      * Merge an array of request data with provided one
      * @param array $options
-     * @return RequestInterface
+     * @return $this
      */
     public function useRequestData(array $options): RequestInterface;
 
@@ -57,15 +151,22 @@ interface RequestInterface
     /**
      * Set request url
      * @param string $url
-     * @return RequestInterface
+     * @return $this
      */
     public function url(string $url): RequestInterface;
+
+    /**
+     * Create form
+     * @param callable|Form $callback
+     * @return $this
+     */
+    public function form($callback): RequestInterface;
 
     /**
      * Choose user agent
      * @param string|UserAgent $userAgent
      * @param string|null $chosen
-     * @return RequestInterface
+     * @return $this
      */
     public function userAgent($userAgent, ?string $chosen = null): RequestInterface;
 
@@ -73,14 +174,14 @@ interface RequestInterface
      * Describes the redirect behavior of a request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#allow-redirects
      * @param bool $options
-     * @return RequestInterface
+     * @return $this
      */
     public function allowRedirects(bool $options = true): RequestInterface;
 
     /**
      * Set redirect handler
      * @param callable $callback
-     * @return RequestInterface
+     * @return $this
      */
     public function redirects(callable $callback): RequestInterface;
 
@@ -94,7 +195,7 @@ interface RequestInterface
      * @param string|array $optionOrUsername
      * @param string|null $typeOrPassword
      * @param string|null $type
-     * @return RequestInterface
+     * @return $this
      */
     public function auth($optionOrUsername, ?string $typeOrPassword = null, ?string $type = null): RequestInterface;
 
@@ -102,7 +203,7 @@ interface RequestInterface
      * The body option is used to control the body of an entity enclosing request (e.g., PUT, POST, PATCH).
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#body
      * @param mixed $body
-     * @return RequestInterface
+     * @return $this
      */
     public function body($body): RequestInterface;
 
@@ -113,7 +214,7 @@ interface RequestInterface
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#cert
      * @param string|array $optionOrFile
      * @param string|null $password
-     * @return RequestInterface
+     * @return $this
      */
     public function cert($optionOrFile, ?string $password = null): RequestInterface;
 
@@ -122,7 +223,7 @@ interface RequestInterface
      * Use 0 to wait indefinitely (the default behavior).
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#connect-timeout
      * @param float $seconds
-     * @return RequestInterface
+     * @return $this
      */
     public function connectTimeout(float $seconds): RequestInterface;
 
@@ -134,14 +235,14 @@ interface RequestInterface
      * If a PHP stream is provided, output is written to the stream.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#debug
      * @param bool $bool
-     * @return RequestInterface
+     * @return $this
      */
     public function debug(bool $bool = true): RequestInterface;
 
     /**
      * Decode content
      * @param bool $bool
-     * @return RequestInterface
+     * @return $this
      */
     public function decodeContent(bool $bool = true): RequestInterface;
 
@@ -149,7 +250,7 @@ interface RequestInterface
      * Specify whether or not Content-Encoding responses (gzip, deflate, etc.) are automatically decoded.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#decode-content
      * @param float $delay
-     * @return RequestInterface
+     * @return $this
      */
     public function delay(float $delay): RequestInterface;
 
@@ -157,7 +258,7 @@ interface RequestInterface
      * Controls the behavior of the "Expect: 100-Continue" header.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#expect
      * @param int|bool $expect
-     * @return RequestInterface
+     * @return $this
      */
     public function expect($expect): RequestInterface;
 
@@ -165,7 +266,7 @@ interface RequestInterface
      * Set to "v4" if you want the HTTP handlers to use only ipv4 protocol or "v6" for ipv6 protocol.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#force-ip-resolve
      * @param string $version
-     * @return RequestInterface
+     * @return $this
      */
     public function forceIPResolve(string $version): RequestInterface;
 
@@ -173,7 +274,7 @@ interface RequestInterface
      * Used to send an application/x-www-form-urlencoded POST request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#form-params
      * @param array $params
-     * @return RequestInterface
+     * @return $this
      */
     public function formParams(array $params): RequestInterface;
 
@@ -183,7 +284,7 @@ interface RequestInterface
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#headers
      * @param string|array|callable $headersOrKeyOrClosure
      * @param string|null $value
-     * @return RequestInterface
+     * @return $this
      */
     public function header($headersOrKeyOrClosure, ?string $value = null): RequestInterface;
 
@@ -192,7 +293,7 @@ interface RequestInterface
      * Exceptions are thrown by default when HTTP protocol errors are encountered.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#http-errors
      * @param bool $bool
-     * @return RequestInterface
+     * @return $this
      */
     public function httpErrors(bool $bool = true): RequestInterface;
 
@@ -200,7 +301,7 @@ interface RequestInterface
      * Internationalized Domain Name (IDN) support (enabled by default if intl extension is available).
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#idn-conversion
      * @param bool $bool
-     * @return RequestInterface
+     * @return $this
      */
     public function idnConversion(bool $bool = true): RequestInterface;
 
@@ -209,7 +310,7 @@ interface RequestInterface
      * A Content-Type header of application/json will be added if no Content-Type header is already present on the message.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#json
      * @param string $json
-     * @return RequestInterface
+     * @return $this
      */
     public function json(string $json): RequestInterface;
 
@@ -217,7 +318,7 @@ interface RequestInterface
      * Sets the body of the request to a multipart/form-data form.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#multipart
      * @param array $data
-     * @return RequestInterface
+     * @return $this
      */
     public function multipart(array $data): RequestInterface;
 
@@ -225,7 +326,7 @@ interface RequestInterface
      * A callable that is invoked when the HTTP headers of the response have been received but the body has not yet begun to download.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#on-headers
      * @param callable $callback
-     * @return RequestInterface
+     * @return $this
      */
     public function onHeaders(callable $callback): RequestInterface;
 
@@ -237,7 +338,7 @@ interface RequestInterface
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#on-stats
      * Listen to stats event
      * @param callable $callback
-     * @return RequestInterface
+     * @return $this
      */
     public function onStats(callable $callback): RequestInterface;
 
@@ -245,7 +346,7 @@ interface RequestInterface
      * Defines a function to invoke when transfer progress is made.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#progress
      * @param callable $callback
-     * @return RequestInterface
+     * @return $this
      */
     public function progress(callable $callback): RequestInterface;
 
@@ -253,7 +354,7 @@ interface RequestInterface
      * Pass a string to specify an HTTP proxy, or an array to specify different proxies for different protocols.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#proxy
      * @param string $url
-     * @return RequestInterface
+     * @return $this
      */
     public function proxy(string $url): RequestInterface;
 
@@ -262,7 +363,7 @@ interface RequestInterface
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#query
      * @param string|array $queriesOrName an array of queries or query name
      * @param string|null $queryValue
-     * @return RequestInterface
+     * @return $this
      */
     public function query($queriesOrName, ?string $queryValue = null): RequestInterface;
 
@@ -270,7 +371,7 @@ interface RequestInterface
      * Float describing the timeout to use when reading a streamed body
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#read-timeout
      * @param float $seconds
-     * @return RequestInterface
+     * @return $this
      */
     public function readTimeout(float $seconds): RequestInterface;
 
@@ -278,7 +379,7 @@ interface RequestInterface
      * Specify where the body of a response will be saved.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#sink
      * @param mixed $file string (path to file on disk), fopen() resource, Psr\Http\Message\StreamInterface
-     * @return RequestInterface
+     * @return $this
      */
     public function sink($file): RequestInterface;
 
@@ -286,7 +387,7 @@ interface RequestInterface
      * Specify where the body of a response will be saved.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#sink
      * @param StreamInterface $stream
-     * @return RequestInterface
+     * @return $this
      */
     public function saveTo(StreamInterface $stream): RequestInterface;
 
@@ -297,7 +398,7 @@ interface RequestInterface
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#ssl-key
      * @param string|array $fileOrPassword
      * @param string|null $password
-     * @return RequestInterface
+     * @return $this
      */
     public function sslKey($fileOrPassword, ?string $password = null): RequestInterface;
 
@@ -305,7 +406,7 @@ interface RequestInterface
      * Set to true to stream a response rather than download it all up-front.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#stream
      * @param bool $bool
-     * @return RequestInterface
+     * @return $this
      */
     public function stream(bool $bool = true): RequestInterface;
 
@@ -314,7 +415,7 @@ interface RequestInterface
      * This can be useful for optimizations.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#synchronous
      * @param bool $bool
-     * @return RequestInterface
+     * @return $this
      */
     public function synchronous(bool $bool = true): RequestInterface;
 
@@ -322,7 +423,7 @@ interface RequestInterface
      * Describes the SSL certificate verification behavior of a request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#verify
      * @param string|bool $verify
-     * @return RequestInterface
+     * @return $this
      */
     public function verify($verify): RequestInterface;
 
@@ -330,7 +431,7 @@ interface RequestInterface
      * Float describing the total timeout of the request in seconds. Use 0 to wait indefinitely (the default behavior).
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#timeout
      * @param float $seconds
-     * @return RequestInterface
+     * @return $this
      */
     public function timeout(float $seconds): RequestInterface;
 
@@ -338,14 +439,14 @@ interface RequestInterface
      * Protocol version to use with the request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#version
      * @param string $version
-     * @return RequestInterface
+     * @return $this
      */
     public function version(string $version): RequestInterface;
 
     /**
      * Send http request with preferred referer url
      * @param string $refererUrl
-     * @return RequestInterface
+     * @return $this
      */
     public function referer(string $refererUrl): RequestInterface;
 }
