@@ -46,6 +46,7 @@ use GuzzleHttp\Cookie\CookieJar;
  * @method static GuzzleWrapper verify($verify) Request verification
  * @method static GuzzleWrapper timeout(float $seconds) Set request timeout
  * @method static GuzzleWrapper version(string $version) Set request version
+ * @method static GuzzleWrapper referer(string $refererUrl) Set http referrer
  * @method static GuzzleWrapper withCookie(?CookieJar $cookie) Use cookie provided by guzzle
  * @method static GuzzleWrapper withCookieFile(string $file) Send request with cookie from file and stored to file
  * @method static GuzzleWrapper withCookieSession(string $name) Send request with cookie session
