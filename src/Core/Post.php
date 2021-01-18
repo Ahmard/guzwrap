@@ -8,7 +8,9 @@ class Post
 {
     protected array $options = array();
 
-    protected array $formParams = array();
+    protected array $formParams = array(
+        'form_params' => array(),
+    );
 
     protected bool $hasFile = false;
 
