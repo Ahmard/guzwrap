@@ -212,11 +212,11 @@ interface RequestInterface
      * If a password is required, then set to an array containing the path to the PEM file in the
      * first array element followed by the password required for the certificate in the second array element.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#cert
-     * @param string|array $optionOrFile
+     * @param string|array $optionOrFilePath
      * @param string|null $password
      * @return $this
      */
-    public function cert($optionOrFile, ?string $password = null): RequestInterface;
+    public function cert($optionOrFilePath, ?string $password = null): RequestInterface;
 
     /**
      * Float describing the number of seconds to wait while trying to connect to a server.
@@ -234,10 +234,10 @@ interface RequestInterface
      * If set to true, the output is written to PHP's STDOUT.
      * If a PHP stream is provided, output is written to the stream.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#debug
-     * @param bool $bool
+     * @param bool|resource $boolOrStream
      * @return $this
      */
-    public function debug(bool $bool = true): RequestInterface;
+    public function debug($boolOrStream = true): RequestInterface;
 
     /**
      * Decode content
@@ -348,7 +348,7 @@ interface RequestInterface
      * @param callable $callback
      * @return $this
      */
-    public function progress(callable $callback): RequestInterface;
+    public function onProgress(callable $callback): RequestInterface;
 
     /**
      * Pass a string to specify an HTTP proxy, or an array to specify different proxies for different protocols.
@@ -376,7 +376,7 @@ interface RequestInterface
     public function readTimeout(float $seconds): RequestInterface;
 
     /**
-     * Specify where the body of a response will be saved.
+     * Specify file path where the body of a response will be saved.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#sink
      * @param mixed $file string (path to file on disk), fopen() resource, Psr\Http\Message\StreamInterface
      * @return $this
@@ -384,7 +384,7 @@ interface RequestInterface
     public function sink($file): RequestInterface;
 
     /**
-     * Specify where the body of a response will be saved.
+     * Specify resource/stream where the body of a response will be saved.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#sink
      * @param StreamInterface $stream
      * @return $this

@@ -4,7 +4,7 @@ namespace Guzwrap\Wrapper;
 
 class Redirect
 {
-    protected array $options = array();
+    protected array $values = array();
 
     /**
      * Set maximum redirects
@@ -24,7 +24,7 @@ class Redirect
      */
     public function setOption(string $name, $value): Redirect
     {
-        $this->options[$name] = $value;
+        $this->values[$name] = $value;
         return $this;
     }
 
@@ -40,12 +40,12 @@ class Redirect
 
     /**
      * Set whether to use redirect referrer
-     * @param bool $ref
+     * @param bool $shouldUseReferer
      * @return $this
      */
-    public function referer(bool $ref = true): Redirect
+    public function referer(bool $shouldUseReferer = true): Redirect
     {
-        return $this->setOption('referer', $ref);
+        return $this->setOption('referer', $shouldUseReferer);
     }
 
     /**
@@ -81,11 +81,11 @@ class Redirect
      * Get redirect options
      * @return array
      */
-    public function getOptions(): array
+    public function getValues(): array
     {
-        if (empty($this->options)) {
+        if (empty($this->values)) {
             return [];
         }
-        return $this->options;
+        return $this->values;
     }
 }

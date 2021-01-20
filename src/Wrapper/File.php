@@ -32,7 +32,7 @@ class File
      */
     public function path(string $filePath): File
     {
-        $this->filePath = $filePath;
+        $this->formValues['file_path'] = $filePath;
         $this->formValues['contents'] = fopen($filePath, 'r');
         return $this;
     }

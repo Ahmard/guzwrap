@@ -254,7 +254,7 @@ class Guzzle implements RequestInterface
     {
         $redirectObject = new Redirect();
         $callback($redirectObject);
-        $options = $redirectObject->getOptions();
+        $options = $redirectObject->getValues();
         return $this->addOption('allow_redirects', $options);
     }
 
@@ -291,12 +291,12 @@ class Guzzle implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function cert($optionOrFile, string $password = null): Guzzle
+    public function cert($optionOrFilePath, string $password = null): Guzzle
     {
-        $option = $optionOrFile;
-        if (!is_array($optionOrFile)) {
+        $option = $optionOrFilePath;
+        if (!is_array($optionOrFilePath)) {
             $option = array();
-            $option[] = $optionOrFile;
+            $option[] = $optionOrFilePath;
             $option[] = $password;
         }
 
@@ -316,9 +316,9 @@ class Guzzle implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function debug(bool $bool = true): Guzzle
+    public function debug($boolOrStream = true): Guzzle
     {
-        return $this->addOption('debug', $bool);
+        return $this->addOption('debug', $boolOrStream);
     }
 
     /**
@@ -424,7 +424,7 @@ class Guzzle implements RequestInterface
      * @inheritDoc
      * @return static
      */
-    public function progress(callable $callback): Guzzle
+    public function onProgress(callable $callback): Guzzle
     {
         return $this->addOption('progress', $callback);
     }

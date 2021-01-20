@@ -8,7 +8,7 @@ use InvalidArgumentException;
 
 class Form
 {
-    protected array $values = array();
+    protected array $values = ['method' => 'GET'];
     protected array $formParams = ['form_params' => []];
 
     /**
@@ -68,21 +68,22 @@ class Form
 
     /**
      * Add file input
-     * @param string|array|File|callable $filePathOrValue
-     * @param string|null $value
+     * @param string|array|File|callable $fieldName File field name, array of file data retrieved from \Guzwrap\Wrapper\File,
+     * An object of \Guzwrap\Wrapper\File or callable
+     * @param string|null $filePath
      * @return $this
      */
-    public function file($filePathOrValue, string $value = null): self
+    public function file($fieldName, string $filePath = null): self
     {
         $options = [];
-        switch (gettype($filePathOrValue)) {
+        switch (gettype($fieldName)) {
             case 'object':
-                if (is_callable($filePathOrValue)) {
+                if (is_callable($fieldName)) {
                     $fileObj = new File();
-                    $filePathOrValue($fileObj);
+                    $fieldName($fileObj);
                     $options = $fileObj->getValues();
-                }elseif ($filePathOrValue instanceof File){
-                    $options = $filePathOrValue->getValues();
+                }elseif ($fieldName instanceof File){
+                    $options = $fieldName->getValues();
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
@@ -90,12 +91,12 @@ class Form
                 }
                 break;
             case 'array':
-                $options = $filePathOrValue;
+                $options = $fieldName;
                 break;
             case 'string':
                 $fileObj = new File();
-                $fileObj->field($filePathOrValue);
-                $fileObj->path($value);
+                $fileObj->field($fieldName);
+                $fileObj->path($filePath);
                 $options = $fileObj->getValues();
                 break;
         }
