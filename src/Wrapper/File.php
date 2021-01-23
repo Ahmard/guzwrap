@@ -40,11 +40,13 @@ class File
 
     /**
      * Use file resource instead of path
+     * @param string $fieldName
      * @param resource $resource
      * @return $this
      */
-    public function resource($resource): File
+    public function resource(string $fieldName, $resource): File
     {
+        $this->field($fieldName);
         $this->formValues['contents'] = $resource;
         return $this;
     }
@@ -73,7 +75,7 @@ class File
                 if (is_callable($headersOrKeyOrClosure)) {
                     $headerObj = new Header();
                     $headersOrKeyOrClosure($headerObj);
-                    $options = array_merge($this->values['headers'], $headerObj->getOptions());
+                    $options = array_merge($this->values['headers'], $headerObj->getValues());
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;

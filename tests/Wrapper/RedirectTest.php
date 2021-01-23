@@ -16,7 +16,7 @@ class RedirectTest extends TestCase
         $redirect->trackRedirect();
         $redirect->protocols('http', 'https');
         $redirect->referer();
-        $redirect->setOption('name', 'value');
+        $redirect->setValue('name', 'value');
         $redirect->strict();
         $redirect->onRedirect($closure);
 

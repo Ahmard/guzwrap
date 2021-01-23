@@ -4,16 +4,16 @@ namespace Guzwrap\Wrapper;
 
 class Header
 {
-    protected array $options = array();
+    protected array $values = array();
 
     public function add(string $name, string $value): self
     {
-        $this->options[$name] = $value;
+        $this->values[$name] = $value;
         return $this;
     }
 
-    public function getOptions(): array
+    public function getValues(): array
     {
-        return $this->options;
+        return $this->values;
     }
 }

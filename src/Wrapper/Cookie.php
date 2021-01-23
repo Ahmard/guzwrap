@@ -9,12 +9,10 @@ use GuzzleHttp\Cookie\SessionCookieJar;
 
 trait Cookie
 {
-    protected SessionCookieJar $willUseCookieSession;
-
     /**
-     * @var mixed $userCookieChoice
+     * @var mixed $preferredCookie
      */
-    protected $userCookieChoice;
+    protected $preferredCookie;
 
 
     /**
@@ -27,7 +25,7 @@ trait Cookie
             $jar = new CookieJar();
         }
 
-        $this->userCookieChoice = $jar;
+        $this->preferredCookie = $jar;
         return $this;
     }
 
@@ -38,7 +36,7 @@ trait Cookie
     public function withCookieFile(string $file): RequestInterface
     {
         $jar = new FileCookieJar($file);
-        $this->userCookieChoice = $jar;
+        $this->preferredCookie = $jar;
         return $this;
     }
 
@@ -49,7 +47,7 @@ trait Cookie
     public function withCookieSession(string $name): RequestInterface
     {
         $jar = new SessionCookieJar($name, true);
-        $this->willUseCookieSession = $jar;
+        $this->preferredCookie = $jar;
         return $this;
     }
 
@@ -59,16 +57,16 @@ trait Cookie
      */
     public function withCookieArray(array $cookies, string $domain): RequestInterface
     {
-        $jar = CookieJar::fromArray($cookies, $domain);
-        $this->userCookieChoice = $jar;
+        $this->preferredCookie = CookieJar::fromArray($cookies, $domain);
         return $this;
     }
 
     protected function getCookieOptions(): array
     {
-        if ($this->userCookieChoice == null) {
+        if ($this->preferredCookie == null) {
             return [];
         }
-        return ['cookies' => $this->userCookieChoice];
+
+        return ['cookies' => $this->preferredCookie];
     }
 }

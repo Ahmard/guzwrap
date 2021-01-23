@@ -14,38 +14,38 @@ interface RequestInterface
 {
     /**
      * Send GET request
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function get(string $url): RequestInterface;
+    public function get(string $uri): RequestInterface;
 
     /**
      * Send HEAD request
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function head(string $url): RequestInterface;
+    public function head(string $uri): RequestInterface;
 
     /**
      * Send POST request
-     * @param string|callable $urlOrClosure
+     * @param callable|Form $formOrClosure
      * @return $this
      */
-    public function post($urlOrClosure): RequestInterface;
+    public function post($formOrClosure): RequestInterface;
 
     /**
      * Send http delete request
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function delete(string $url): RequestInterface;
+    public function delete(string $uri): RequestInterface;
 
     /**
      * Send http connect request
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function connect(string $url): RequestInterface;
+    public function connect(string $uri): RequestInterface;
 
     /**
      * Use cookie provided by guzzle
@@ -78,31 +78,31 @@ interface RequestInterface
 
     /**
      * Send http options request
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function options(string $url): RequestInterface;
+    public function options(string $uri): RequestInterface;
 
     /**
      * Send http trace request
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function trace(string $url): RequestInterface;
+    public function trace(string $uri): RequestInterface;
 
     /**
      * Send http patch request
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function patch(string $url): RequestInterface;
+    public function patch(string $uri): RequestInterface;
 
     /**
      * Send http put request
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function put(string $url): RequestInterface;
+    public function put(string $uri): RequestInterface;
 
     /**
      * Add option to this request
@@ -114,11 +114,12 @@ interface RequestInterface
 
     /**
      * Make http request
-     * @param string $type
-     * @param mixed ...$argsOrClosure
+     * @param string $method A request method, e.g: GET, POST...
+     * @param string|callable|array|Form $data A callable or an array of request data
+     * @param array $onceData This data will be one, i.e used for this request only
      * @return $this
      */
-    public function request(string $type, ...$argsOrClosure): RequestInterface;
+    public function request(string $method, $data, array $onceData = []): RequestInterface;
 
     /**
      * Use request data and construct new request with it
@@ -132,14 +133,14 @@ interface RequestInterface
      * @param array $options
      * @return $this
      */
-    public function useRequestData(array $options): RequestInterface;
+    public function useData(array $options): RequestInterface;
 
     /**
-     * Get generated request data
+     * Get generated request data,
      * this data can be passed to guzzle directly
      * @return mixed[]
      */
-    public function getRequestData(): array;
+    public function getData(): array;
 
     /**
      * Execute the request
@@ -149,11 +150,11 @@ interface RequestInterface
     public function exec(): ResponseInterface;
 
     /**
-     * Set request url
-     * @param string $url
+     * Set request uri
+     * @param string $uri
      * @return $this
      */
-    public function url(string $url): RequestInterface;
+    public function uri(string $uri): RequestInterface;
 
     /**
      * Create form
@@ -229,7 +230,7 @@ interface RequestInterface
 
     /**
      * Set to true or set to a PHP stream returned by fopen() to enable debug output with the handler used to send a request.
-     * For example, when using cURL to transfer requests, cURL's verbose of CURLOPT_VERBOSE will be emitted.
+     * For example, when using curi to transfer requests, curi's verbose of CuriOPT_VERBOSE will be emitted.
      * When using the PHP stream wrapper, stream wrapper notifications will be emitted.
      * If set to true, the output is written to PHP's STDOUT.
      * If a PHP stream is provided, output is written to the stream.
@@ -271,7 +272,7 @@ interface RequestInterface
     public function forceIPResolve(string $version): RequestInterface;
 
     /**
-     * Used to send an application/x-www-form-urlencoded POST request.
+     * Used to send an application/x-www-form-uriencoded POST request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#form-params
      * @param array $params
      * @return $this
@@ -353,10 +354,10 @@ interface RequestInterface
     /**
      * Pass a string to specify an HTTP proxy, or an array to specify different proxies for different protocols.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#proxy
-     * @param string $url
+     * @param string $uri
      * @return $this
      */
-    public function proxy(string $url): RequestInterface;
+    public function proxy(string $uri): RequestInterface;
 
     /**
      * Associative array of query string values or query string to add to the request.
@@ -444,9 +445,9 @@ interface RequestInterface
     public function version(string $version): RequestInterface;
 
     /**
-     * Send http request with preferred referer url
-     * @param string $refererUrl
+     * Send http request with preferred referer uri
+     * @param string $refererUri
      * @return $this
      */
-    public function referer(string $refererUrl): RequestInterface;
+    public function referer(string $refererUri): RequestInterface;
 }

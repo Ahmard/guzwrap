@@ -11,83 +11,82 @@ trait RequestMethods
 {
     /**
      * @inheritDoc
-     * @return static
      */
-    public function get(string $url): RequestInterface
+    public function get(string $uri): RequestInterface
     {
-        return $this->request('GET', $url);
+        return $this->request('GET', $uri);
     }
 
     /**
      * @inheritDoc
      * @return static
      */
-    public function head(string $url): RequestInterface
+    public function head(string $uri): RequestInterface
     {
-        return $this->request('HEAD', $url);
+        return $this->request('HEAD', $uri);
     }
 
     /**
      * @inheritDoc
      * @return static
      */
-    public function post($urlOrClosure): RequestInterface
+    public function post($formOrClosure): RequestInterface
     {
-        return $this->request('POST', $urlOrClosure);
+        return $this->request('POST', $formOrClosure);
     }
 
     /**
      * @inheritDoc
      * @return static
      */
-    public function put(string $url): RequestInterface
+    public function put(string $uri): RequestInterface
     {
-        return $this->request('PUT', $url);
+        return $this->request('PUT', $uri);
     }
 
     /**
      * @inheritDoc
      * @return static
      */
-    public function delete(string $url): RequestInterface
+    public function delete(string $uri): RequestInterface
     {
-        return $this->request('DELETE', $url);
+        return $this->request('DELETE', $uri);
     }
 
     /**
      * @inheritDoc
      * @return static
      */
-    public function connect(string $url): RequestInterface
+    public function connect(string $uri): RequestInterface
     {
-        return $this->request('CONNECT', $url);
+        return $this->request('CONNECT', $uri);
     }
 
     /**
      * @inheritDoc
      * @return static
      */
-    public function options(string $url): RequestInterface
+    public function options(string $uri): RequestInterface
     {
-        return $this->request('OPTIONS', $url);
+        return $this->request('OPTIONS', $uri);
     }
 
     /**
      * @inheritDoc
      * @return static
      */
-    public function trace(string $url): RequestInterface
+    public function trace(string $uri): RequestInterface
     {
-        return $this->request('TRACE', $url);
+        return $this->request('TRACE', $uri);
     }
 
     /**
      * @inheritDoc
      * @return static
      */
-    public function patch(string $url): RequestInterface
+    public function patch(string $uri): RequestInterface
     {
-        return $this->request('PATCH', $url);
+        return $this->request('PATCH', $uri);
     }
 
 }

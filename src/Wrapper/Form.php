@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Guzwrap\Wrapper;
 
@@ -8,17 +8,19 @@ use InvalidArgumentException;
 
 class Form
 {
-    protected array $values = ['method' => 'GET'];
-    protected array $formParams = ['form_params' => []];
+    protected array $values = [
+        'method' => 'GET',
+        'form_params' => [],
+    ];
 
     /**
-     * Form action url
-     * @param string $url
+     * Form action uri
+     * @param string $uri
      * @return $this
      */
-    public function action(string $url): Form
+    public function action(string $uri): Form
     {
-        $this->values['url'] = $url;
+        $this->values['uri'] = $uri;
         return $this;
     }
 
@@ -29,7 +31,7 @@ class Form
      */
     public function method(string $method): Form
     {
-        $this->values['method'] = $method;
+        $this->values['method'] = strtoupper($method);
         return $this;
     }
 
@@ -53,16 +55,16 @@ class Form
     public function field($name, ?string $value = null): Form
     {
         if (is_array($name)) {
-            $this->formParams['form_params'] = array_merge($this->formParams['form_params'], $name);
+            $this->values['form_params'] = array_merge($this->values['form_params'], $name);
             return $this;
         }
 
-        if ($name instanceof File){
+        if ($name instanceof File) {
             $this->values['multipart'][] = $name->getValues();
             return $this;
         }
 
-        $this->formParams['form_params'][$name] = $value;
+        $this->values['form_params'][$name] = $value;
         return $this;
     }
 
@@ -70,20 +72,21 @@ class Form
      * Add file input
      * @param string|array|File|callable $fieldName File field name, array of file data retrieved from \Guzwrap\Wrapper\File,
      * An object of \Guzwrap\Wrapper\File or callable
-     * @param string|null $filePath
+     * @param string|resource|null $filePath
      * @return $this
      */
-    public function file($fieldName, string $filePath = null): self
+    public function file($fieldName, $filePath = null): self
     {
-        $options = [];
-        switch (gettype($fieldName)) {
+        $values = [];
+        $dataType = gettype($fieldName);
+        switch ($dataType) {
             case 'object':
                 if (is_callable($fieldName)) {
-                    $fileObj = new File();
-                    $fieldName($fileObj);
-                    $options = $fileObj->getValues();
-                }elseif ($fieldName instanceof File){
-                    $options = $fieldName->getValues();
+                    $file = new File();
+                    $fieldName($file);
+                    $values = $file->getValues();
+                } elseif ($fieldName instanceof File) {
+                    $values = $fieldName->getValues();
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
@@ -91,17 +94,26 @@ class Form
                 }
                 break;
             case 'array':
-                $options = $fieldName;
+                $values = $fieldName;
                 break;
             case 'string':
-                $fileObj = new File();
-                $fileObj->field($fieldName);
-                $fileObj->path($filePath);
-                $options = $fileObj->getValues();
+                if (is_resource($filePath)){
+                    $file = new File();
+                    $file->name($fieldName);
+                    $file->resource($fieldName, $filePath);
+                    $values = $file->getValues();
+                }else{
+                    $file = new File();
+                    $file->field($fieldName);
+                    $file->path($filePath);
+                    $values = $file->getValues();
+                }
                 break;
+            default:
+                throw new InvalidArgumentException("Field name parameter can only accept value of type string, array and object.");
         }
 
-        $this->values['multipart'][] = $options;
+        $this->values['multipart'][] = $values;
 
         return $this;
     }
@@ -112,9 +124,12 @@ class Form
      */
     public function getValues(): array
     {
-        return array_merge(
-            $this->formParams,
-            $this->values
-        );
+        if ('POST' != $this->values['method']){
+            $this->values['query'] = $this->values['form_params'];
+            //Since its not POST request, we won't be needing form parameters
+            unset($this->values['form_params']);
+        }
+
+        return $this->values;
     }
 }

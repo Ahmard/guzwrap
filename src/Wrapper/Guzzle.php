@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Guzwrap\Wrapper;
 
@@ -22,44 +22,56 @@ class Guzzle implements RequestInterface
      * Guzzle request options
      * @var array
      */
-    protected array $values = array();
-    protected array $oneTimedOption = array();
+    protected array $values = [
+        'guzwrap' => [],
+        'headers' => [],
+    ];
+    protected array $oneTimedOption = [];
     /**
      * @var RequestInterface[]
      */
     protected array $requestsToBeUsed = [];
-    private string $url;
-    private string $requestType;
+    private string $uri;
+    private string $requestMethod;
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
-    public function request(string $type, ...$argsOrClosure): Guzzle
+    public function request(string $method, $data, array $onceData = []): Guzzle
     {
-        if ($type == 'POST') {
-            if (gettype($argsOrClosure[0]) == 'object') {
-                $post = new Form();
-                $argsOrClosure[0]($post);
-                //let the $argsOrClosure hold the retrieved options
-                $argsOrClosure = $post->getValues();
-                //If url from post method is used
-                if (isset($argsOrClosure['url'])) {
-                    $this->url = $argsOrClosure['url'];
+        switch ($data){
+            case is_callable($data):
+                $form = new Form();
+                $data($form);
+                //let the $data hold the retrieved options
+                $data = $form->getValues();
+                //If uri from post method is used
+                if (isset($data['action'])) {
+                    $this->uri = $data['action'];
                 }
-            }
+                break;
+            case ($data instanceof Form):
+                $data = $data->getValues();
+                break;
+            case is_string($data):
+                $this->uri($data);
+                break;
+            default:
+                throw new InvalidArgumentException("Argument 2 passed to \\Guzwrap\\Wrapper\\Guzzle must be of type string, array, callable or an instance of \\Guzwrap\\Wrapper\\Guzzle");
         }
 
         //lets check if its one timed options are provided
-        if (isset($argsOrClosure[1])) {
-            $this->oneTimedOption = $argsOrClosure[1];
-        }
+        $this->oneTimedOption = $onceData;
 
-        $this->requestType = $type;
-        $this->values = array_merge(
-            $this->values,
-            ($argsOrClosure ?? [])
-        );
+        $this->requestMethod = $method;
+
+        if (is_array($data)){
+            $this->values = array_merge(
+                $this->values,
+                ($data ?? [])
+            );
+        }
 
         return $this;
     }
@@ -69,82 +81,92 @@ class Guzzle implements RequestInterface
      */
     public function exec(): ResponseInterface
     {
-        $options = $this->getRequestData();
+        $requestData = $this->getData();
 
-        $options['headers'] ??= [];
-        if (!array_key_exists('user-agent', $options['headers'])) {
-            $options['headers']['user-agent'] = UserAgent::init()->getRandom();
+        //Verify request method against file upload
+        if (isset($this->values['multipart']) && 'POST' != $requestData['method']){
+            throw new InvalidArgumentException("File cannot uploaded through {$requestData['method']} method, try changing request method to POST");
+        }
+
+        //Verify request user-agent
+        if (!array_key_exists('user-agent', $requestData['headers'])) {
+            $requestData['headers']['user-agent'] = UserAgent::init()->getRandom();
         }
 
         //Create guzzle client
-        $client = new Client($options);
+        $client = new Client($requestData);
 
-        if (!$options['the_url']) {
-            throw new InvalidArgumentException('You cannot send request without providing request url.');
+        //Verify that request uri is provided
+        if (!isset($requestData['guzwrap']['uri'])) {
+            throw new InvalidArgumentException('You cannot send request without providing request uri.');
         }
 
+        //Retrieve and unset one-timed-options
+        $onceValues = $this->oneTimedOption;
+        unset($this->oneTimedOption);
+
+        //Execute the request
         return $client->request(
-            $options['method'],
-            $options['the_url'],
-            $this->oneTimedOption
+            $requestData['method'],
+            $requestData['guzwrap']['uri'],
+            $onceValues
         );
     }
 
     /**
      * @inheritDoc
      */
-    public function getRequestData(): array
+    public function getData(): array
     {
         //Merge used request data if any is used
         if (!empty($this->requestsToBeUsed)) {
             foreach ($this->requestsToBeUsed as $request) {
-                $this->useRequestData($request->getRequestData());
+                $this->useData($request->getData());
             }
         }
 
-        $options = array_merge(
+        $data = array_merge(
             $this->values,
             $this->getCookieOptions()
         );
 
-        if (isset($options[0])) {
-            $options['the_url'] = $options[0];
-        } elseif (isset($this->url)) {
-            $options['the_url'] = $this->url;
+        if (isset($data[0])) {
+            $data['guzwrap']['uri'] = $data[0];
+            unset($data[0]);
+        } elseif (isset($this->uri)) {
+            $data['guzwrap']['uri'] = $this->uri;
         }
         //Set request method
-        if (isset($this->requestType)) {
-            $options['method'] = $this->requestType;
+        if (isset($this->requestMethod)) {
+            $data['method'] = $this->requestMethod;
         }
-
-        // unset($options[0]);
 
         /**
          * Let's check if the request has file
          * If there is file, we will merge form_params with multipart
          */
-        $formParams = $options['form_params'] ?? null;
+        $formParams = $data['form_params'] ?? null;
 
-        if (isset($options['multipart']) && isset($formParams)) {
+        if (isset($data['multipart']) && isset($formParams)) {
             $keys = array_keys($formParams);
 
             for ($i = 0; $i < count($formParams); $i++) {
-                $options['multipart'][] = [
+                $data['multipart'][] = [
                     'name' => $keys[$i],
                     'contents' => $formParams[$keys[$i]]
                 ];
             }
 
-            unset($options['form_params'], $formParams);
+            unset($data['form_params'], $formParams);
         }
 
-        return $options;
+        return $data;
     }
 
     /**
      * @inheritDoc
      */
-    public function useRequestData(array $options): Guzzle
+    public function useData(array $options): Guzzle
     {
         $this->values = array_merge_recursive($this->values, $options);
         return $this;
@@ -161,33 +183,22 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
-     */
-    public function url(string $url): Guzzle
-    {
-        $this->url = $url;
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     * @return static
      */
     public function form($callback): Guzzle
     {
-        if (is_callable($callback)){
+        if (is_callable($callback)) {
             $form = new Form();
             $callback($form);
             $values = $form->getValues();
         }
 
-        if (!isset($values)){
+        if (!isset($values)) {
             $values = $callback->getValues();
         }
 
-        if (isset($values['url'])){
-            $this->url($values['url']);
-            unset($values['url']);
+        if (isset($values['uri'])) {
+            $this->uri($values['uri']);
+            unset($values['uri']);
         }
 
         $this->values = array_merge($this->values, $values);
@@ -196,7 +207,15 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
+     */
+    public function uri(string $uri): Guzzle
+    {
+        $this->uri = $uri;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
      */
     public function userAgent($userAgent, ?string $chosen = null): Guzzle
     {
@@ -218,7 +237,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function addOption(string $name, $value): Guzzle
     {
@@ -239,7 +257,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function allowRedirects(bool $options = true): Guzzle
     {
@@ -248,7 +265,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function redirects(callable $callback): Guzzle
     {
@@ -260,7 +276,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function auth($optionOrUsername, string $typeOrPassword = null, string $type = null): Guzzle
     {
@@ -270,8 +285,8 @@ class Guzzle implements RequestInterface
             $option[] = $optionOrUsername;
             $option[] = $typeOrPassword;
 
-            if ($type != null) {
-                $option[] = $typeOrPassword;
+            if (null != $type) {
+                $option[] = $type;
             }
         }
 
@@ -280,7 +295,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function body($body): Guzzle
     {
@@ -289,15 +303,18 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function cert($optionOrFilePath, string $password = null): Guzzle
     {
         $option = $optionOrFilePath;
         if (!is_array($optionOrFilePath)) {
-            $option = array();
-            $option[] = $optionOrFilePath;
-            $option[] = $password;
+            if (null == $password){
+                $option = $optionOrFilePath;
+            }else{
+                $option = array();
+                $option[] = $optionOrFilePath;
+                $option[] = $password;
+            }
         }
 
         return $this->addOption('cert', $option);
@@ -305,7 +322,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function connectTimeout(float $seconds): Guzzle
     {
@@ -314,7 +330,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function debug($boolOrStream = true): Guzzle
     {
@@ -323,7 +338,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function decodeContent(bool $bool = true): Guzzle
     {
@@ -332,7 +346,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function delay(float $delay): Guzzle
     {
@@ -341,7 +354,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function expect($expect): Guzzle
     {
@@ -350,7 +362,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function forceIPResolve(string $version): Guzzle
     {
@@ -359,7 +370,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function formParams(array $params): Guzzle
     {
@@ -368,7 +378,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function httpErrors(bool $bool = true): Guzzle
     {
@@ -377,7 +386,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function idnConversion(bool $bool = true): Guzzle
     {
@@ -386,7 +394,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function json(string $json): Guzzle
     {
@@ -395,7 +402,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function multipart(array $data): Guzzle
     {
@@ -404,7 +410,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function onHeaders(callable $callback): Guzzle
     {
@@ -413,7 +418,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function onStats(callable $callback): Guzzle
     {
@@ -422,7 +426,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function onProgress(callable $callback): Guzzle
     {
@@ -431,17 +434,15 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
-    public function proxy(string $url): Guzzle
+    public function proxy(string $uri): Guzzle
     {
-        return $this->addOption('proxy', $url);
+        return $this->addOption('proxy', $uri);
     }
 
     /**
      * @inheritDoc
-     * @return static
-     * @return static
+     *
      */
     public function query($queriesOrName, string $queryValue = null): Guzzle
     {
@@ -454,7 +455,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function readTimeout(float $seconds): Guzzle
     {
@@ -463,7 +463,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function sink($file): Guzzle
     {
@@ -472,7 +471,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function saveTo(StreamInterface $stream): Guzzle
     {
@@ -481,23 +479,23 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function sslKey($fileOrPassword, $password = null): Guzzle
     {
-        $option = array();
+        $option = $fileOrPassword;
         if (!is_array($fileOrPassword)) {
-            $option[] = $fileOrPassword;
             if ($password != null) {
+                $option = array();
+                $option[] = $fileOrPassword;
                 $option[] = $password;
             }
         }
+
         return $this->addOption('ssl_key', $option);
     }
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function stream(bool $bool = true): Guzzle
     {
@@ -506,7 +504,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function synchronous(bool $bool = true): Guzzle
     {
@@ -515,7 +512,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function verify($verify): Guzzle
     {
@@ -524,7 +520,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function timeout(float $seconds): Guzzle
     {
@@ -533,7 +528,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function version(string $version): Guzzle
     {
@@ -542,16 +536,14 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     * @return static
      */
-    public function referer(string $refererUrl): Guzzle
+    public function referer(string $refererUri): Guzzle
     {
-        return $this->header('Referer', $refererUrl);
+        return $this->header('Referer', $refererUri);
     }
 
     /**
      * @inheritDoc
-     * @return static
      */
     public function header($headersOrKeyOrClosure, string $value = null): Guzzle
     {
@@ -562,7 +554,7 @@ class Guzzle implements RequestInterface
                 if (is_callable($headersOrKeyOrClosure)) {
                     $headerObj = new Header();
                     $headersOrKeyOrClosure($headerObj);
-                    $options = array_merge(($this->values['headers'] ?? []), $headerObj->getOptions());
+                    $options = array_merge(($this->values['headers'] ?? []), $headerObj->getValues());
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;

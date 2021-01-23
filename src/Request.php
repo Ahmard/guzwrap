@@ -11,11 +11,11 @@ use Psr\Http\Message\StreamInterface;
  * This Class servers as proxy to Guzzle\Wrapper which help provide convenience usage to this package
  * @package Guzwrap
  * @method static Guzzle useRequest(RequestInterface ...$requests) Merge an array of request data with provided one
- * @method static Guzzle useRequestData(array $requestData) Merge an array of request data with provided one
+ * @method static Guzzle useData(array $requestData) Merge an array of request data with provided one
  * @method static Guzzle addOption(string $name, mixed $value) Add option to this request
  * @method static Guzzle request(string $type, mixed $argsOrClosure) Make http request
  * @method static Guzzle exec() Execute the request
- * @method static Guzzle url(string $url) Set request url
+ * @method static Guzzle uri(string $uri) Set request uri
  * @method static Guzzle form(callable|Form $callback) Create form
  * @method static Guzzle userAgent(string $userAgent, ?string $chosen = null) Choose user agent
  * @method static Guzzle allowRedirects($options) Whether to allow redirect during this request
@@ -29,8 +29,8 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle delay(float $delay) Specify whether or not Content-Encoding responses (gzip, deflate, etc.) are automatically decoded.
  * @method static Guzzle expect($expect) Controls the behavior of the "Expect: 100-Continue" header.
  * @method static Guzzle forceIPResolve($version) Set to "v4" if you want the HTTP handlers to use only ipv4 protocol or "v6" for ipv6 protocol.
- * @method static Guzzle formParams(array $params) Used to send an application/x-www-form-urlencoded POST request.
- * @method static Guzzle header($headersOrKeyOrClosure, $value) Associative array of headers to add to the request.
+ * @method static Guzzle formParams(array $params) Used to send an application/x-www-form-uriencoded POST request.
+ * @method static Guzzle header(string|array|callable $headersOrKeyOrClosure, ?string $value = null) Associative array of headers to add to the request.
  * @method static Guzzle httpErrors($bool) Set to false to disable throwing exceptions on an HTTP protocol errors (i.e., 4xx and 5xx responses).
  * @method static Guzzle idnConversion($bool) Internationalized Domain Name (IDN) support (enabled by default if intl extension is available).
  * @method static Guzzle json(string $json) The json option is used to easily upload JSON encoded data as the body of a request.
@@ -38,7 +38,7 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle onHeaders(callable $callback) A callable that is invoked when the HTTP headers of the response have been received but the body has not yet begun to download.
  * @method static Guzzle onStats(callable $callback) Allows you to get access to transfer statistics of a request and access the lower level transfer details of the handler associated with your client.
  * @method static Guzzle onProgress(callable $callback) Monitor request progress
- * @method static Guzzle proxy(string $url) Pass a string to specify an HTTP proxy, or an array to specify different proxies for different protocols.
+ * @method static Guzzle proxy(string $uri) Pass a string to specify an HTTP proxy, or an array to specify different proxies for different protocols.
  * @method static Guzzle query(string|array $queriesOrName, ?string $queryValue = null) Associative array of query string values or query string to add to the request.
  * @method static Guzzle readTimeout(float $seconds) Float describing the timeout to use when reading a streamed body
  * @method static Guzzle sink(string $file) Specify file path where the body of a response will be saved.
@@ -49,20 +49,20 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle verify($verify) Describes the SSL certificate verification behavior of a request.
  * @method static Guzzle timeout(float $seconds) Float describing the total timeout of the request in seconds. Use 0 to wait indefinitely (the default behavior).
  * @method static Guzzle version(string $version) Protocol version to use with the request.
- * @method static Guzzle referer(string $refererUrl) Set http referrer
+ * @method static Guzzle referer(string $refereruri) Set http referrer
  * @method static Guzzle withCookie(?CookieJar $cookie) Use cookie provided by guzzle
  * @method static Guzzle withCookieFile(string $file) Send request with cookie from file and stored to file
  * @method static Guzzle withCookieSession(string $name) Send request with cookie session
  * @method static Guzzle withCookieArray(array $cookies, string $domain) If user have cookie in hand
- * @method static Guzzle get(string $url) Send GET request
- * @method static Guzzle head(string $url) Send HEAD request
- * @method static Guzzle post($urlOrClosure) Send POST request
- * @method static Guzzle put(string $url) Send http put request
- * @method static Guzzle delete(string $url) Send http delete request
- * @method static Guzzle connect(string $url) Send http connect request
- * @method static Guzzle options(string $url) Send http options request
- * @method static Guzzle trace(string $url) Send http trace request
- * @method static Guzzle patch(string $url) Send http patch request
+ * @method static Guzzle get(string $uri) Send GET request
+ * @method static Guzzle head(string $uri) Send HEAD request
+ * @method static Guzzle post($uriOrClosure) Send POST request
+ * @method static Guzzle put(string $uri) Send http put request
+ * @method static Guzzle delete(string $uri) Send http delete request
+ * @method static Guzzle connect(string $uri) Send http connect request
+ * @method static Guzzle options(string $uri) Send http options request
+ * @method static Guzzle trace(string $uri) Send http trace request
+ * @method static Guzzle patch(string $uri) Send http patch request
  */
 class Request
 {
@@ -78,6 +78,15 @@ class Request
     }
 
     /**
+     * Get the request wrapper instance
+     * @return Guzzle
+     */
+    public static function getInstance(): Guzzle
+    {
+        return new Guzzle();
+    }
+
+    /**
      * Proxy object calls to Wrapper\Guzzle
      * @param string $name
      * @param array $arguments
@@ -86,14 +95,5 @@ class Request
     public function __call(string $name, array $arguments): Guzzle
     {
         return self::getInstance()->$name(...$arguments);
-    }
-
-    /**
-     * Get the request wrapper instance
-     * @return Guzzle
-     */
-    public static function getInstance(): Guzzle
-    {
-        return new Guzzle();
     }
 }
