@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
-namespace Guzwrap\Core;
+namespace Guzwrap\Wrapper;
 
 class Redirect
 {
-    protected array $options = array();
+    protected array $values = array();
 
     /**
      * Set maximum redirects
@@ -13,7 +14,7 @@ class Redirect
      */
     public function max(int $value): Redirect
     {
-        return $this->setOption('max', $value);
+        return $this->setValue('max', $value);
     }
 
     /**
@@ -22,9 +23,9 @@ class Redirect
      * @param mixed $value
      * @return $this
      */
-    public function setOption(string $name, $value): Redirect
+    public function setValue(string $name, $value): Redirect
     {
-        $this->options[$name] = $value;
+        $this->values[$name] = $value;
         return $this;
     }
 
@@ -35,17 +36,17 @@ class Redirect
      */
     public function strict(bool $bool = true): Redirect
     {
-        return $this->setOption('strict', $bool);
+        return $this->setValue('strict', $bool);
     }
 
     /**
      * Set whether to use redirect referrer
-     * @param bool $ref
+     * @param bool $shouldUseReferer
      * @return $this
      */
-    public function referer(bool $ref = true): Redirect
+    public function referer(bool $shouldUseReferer = true): Redirect
     {
-        return $this->setOption('referer', $ref);
+        return $this->setValue('referer', $shouldUseReferer);
     }
 
     /**
@@ -55,7 +56,7 @@ class Redirect
      */
     public function protocols(...$protocols): Redirect
     {
-        return $this->setOption('protocols', $protocols);
+        return $this->setValue('protocols', $protocols);
     }
 
     /**
@@ -65,27 +66,27 @@ class Redirect
      */
     public function onRedirect(callable $callback): Redirect
     {
-        return $this->setOption('on_redirect', $callback);
+        return $this->setValue('on_redirect', $callback);
     }
 
     /**
      * Whether to track redirects
      * @return $this
      */
-    public function trackRedirect(): Redirect
+    public function trackRedirects(): Redirect
     {
-        return $this->setOption('track_redirects', true);
+        return $this->setValue('track_redirects', true);
     }
 
     /**
      * Get redirect options
      * @return array
      */
-    public function getOptions(): array
+    public function getValues(): array
     {
-        if (empty($this->options)) {
+        if (empty($this->values)) {
             return [];
         }
-        return $this->options;
+        return $this->values;
     }
 }

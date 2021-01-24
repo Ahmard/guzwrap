@@ -1,29 +1,19 @@
 <?php
+declare(strict_types=1);
 
-namespace Guzwrap\Core;
+namespace Guzwrap\Wrapper;
 
 use InvalidArgumentException;
 
 class File
 {
-    protected array $options = array(
+    protected array $values = array(
         'headers' => []
     );
 
-    protected array $formOptions = array();
+    protected array $formValues = array();
 
     protected ?string $filePath = null;
-
-    /**
-     * Input field name
-     * @param string $name
-     * @return $this
-     */
-    public function field(string $name): File
-    {
-        $this->formOptions['name'] = $name;
-        return $this;
-    }
 
     /**
      * Use file path instead of resources
@@ -32,20 +22,32 @@ class File
      */
     public function path(string $filePath): File
     {
-        $this->filePath = $filePath;
-        $this->formOptions['contents'] = fopen($filePath, 'r');
+        $this->formValues['file_path'] = $filePath;
+        $this->formValues['contents'] = fopen($filePath, 'r');
         return $this;
     }
 
-
     /**
      * Use file resource instead of path
+     * @param string $fieldName
      * @param resource $resource
      * @return $this
      */
-    public function resource($resource): File
+    public function resource(string $fieldName, $resource): File
     {
-        $this->formOptions['contents'] = $resource;
+        $this->field($fieldName);
+        $this->formValues['contents'] = $resource;
+        return $this;
+    }
+
+    /**
+     * Input field name
+     * @param string $name
+     * @return $this
+     */
+    public function field(string $name): File
+    {
+        $this->formValues['name'] = $name;
         return $this;
     }
 
@@ -56,7 +58,7 @@ class File
      */
     public function name(string $filename): File
     {
-        $this->formOptions['filename'] = $filename;
+        $this->formValues['filename'] = $filename;
         return $this;
     }
 
@@ -73,7 +75,7 @@ class File
                 if (is_callable($headersOrKeyOrClosure)) {
                     $headerObj = new Header();
                     $headersOrKeyOrClosure($headerObj);
-                    $options = array_merge($this->options['headers'], $headerObj->getOptions());
+                    $options = array_merge($this->values['headers'], $headerObj->getValues());
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
@@ -92,19 +94,19 @@ class File
                 ");
         }
 
-        $this->options['headers'] = array_merge(
-            $this->options['headers'],
+        $this->values['headers'] = array_merge(
+            $this->values['headers'],
             $options
         );
 
         return $this;
     }
 
-    public function getOptions(): array
+    public function getValues(): array
     {
         return array_merge(
-            $this->formOptions,
-            $this->options
+            $this->formValues,
+            $this->values
         );
     }
 }

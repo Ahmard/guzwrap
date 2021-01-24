@@ -1,19 +1,25 @@
 {
-    "name": "ahmard/guzwrap",
-    "description": "A wrapper around popular php http client, \"GuzzleHttp\"",
-    "type": "library",
-    "require": {
-        "php": "^7.4 || ^8.0",
-        "ext-json": "*",
-        "guzzlehttp/guzzle": "^6.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "Guzwrap\\": "src/"
-        }
-    },
-    "license": "mit",
-    "require-dev": {
-        "phpstan/phpstan": "^0.12.64"
+  "name": "ahmard/guzwrap",
+  "description": "A wrapper around popular php http client, \"GuzzleHttp\"",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": "^7.4 || ^8.0",
+    "ext-json": "*",
+    "guzzlehttp/guzzle": "^6.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Guzwrap\\": "src/"
     }
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^0.12.64",
+    "phpunit/phpunit": "^9.5"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Guzwrap\\Tests\\": "tests/"
+    }
+  }
 }

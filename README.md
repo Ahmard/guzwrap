@@ -1,14 +1,12 @@
-Guzwrap, PHP GuzzleHttp Wrapper.
+Guzwrap
 ==============================================
 
 Guzwrap is an object-oriented wrapper around [GuzzleHttp](http://guzzlephp.org/). <br/>
-This project is founded to make sending request with Guzzle easier.
+This project is founded to make sending request with Guzzle easier and enjoyable.
 
 # Installation
 
-Make sure you have [Composer](http://getcomposer.org) installed .
-
-Now, let's install Guzwrap:
+Make sure you have [Composer](http://getcomposer.org) installed.
 
 ```bash
 composer require ahmard/guzwrap
@@ -33,7 +31,7 @@ Request::get('http://localhost:8002')
 ```php
 use Guzwrap\Request;
 
-$instance = Request::getInstance();
+$instance = Request::create();
 //Do something...
 ```
 
@@ -42,7 +40,7 @@ $instance = Request::getInstance();
 ```php
 use Guzwrap\Request;
 
-Request::get('http://localhost:8002')
+Request::create()->get('http://localhost:8002')
     ->withCookie()
     //or use cookie file
     ->withCookieFile('path/to/file')
@@ -53,22 +51,24 @@ Request::get('http://localhost:8002')
         'first_name' => 'Jane',
         'other_names' => 'Doe'
     ], 'localhost')
-    ->exec();
+    //Use single cookie across requests
+    ->withSharedCookie();
 ```
 
 - Handle redirects
 
 ```php
 use Guzwrap\Request;
+use Guzwrap\Wrapper\Redirect;
 
 Request::get('http://localhost:8002')
-    ->redirects(function($wrp){
-        $wrp->max(5);
-        $wrp->strict();
-        $wrp->referer('http://goo.gl');
-        $wrp->protocol('http');
-        $wrp->trackRedirects();
-        $wrp->onRedirect(function(){
+    ->redirects(function(Redirect $redirect){
+        $redirect->max(5);
+        $redirect->strict();
+        $redirect->referer('http://goo.gl');
+        $redirect->protocols('http');
+        $redirect->trackRedirects();
+        $redirect->onRedirect(function(){
             echo "Redirection detected!";
         });
     })->exec();
@@ -78,11 +78,12 @@ Request::get('http://localhost:8002')
 
 ```php
 use Guzwrap\Request;
+use Guzwrap\Wrapper\Header;
 
 Request::get('http://localhost:8002')
-    ->header(function($h){
-        $h->add('hello', 'world');
-        $h->add('planet', 'earth');
+    ->header(function(Header $header){
+        $header->add('hello', 'world');
+        $header->add('planet', 'earth');
     })
     ->exec();
 ```
@@ -100,26 +101,42 @@ Request::get('https://google.com')
 - Post form data
 
 ```php
-use Guzwrap\Core\File;
 use Guzwrap\Request;
+use Guzwrap\Wrapper\Form;
 
-Request::url('http://localhost:8002')
-    ->post(function($req){
-        $req->field('first_name', 'Jane');
-        $req->field('last_name', 'Doe');
+Request::uri('http://localhost:8002')
+    ->post(function(Form $form){
+        $form->field('first_name', 'Jane');
+        $form->field('last_name', 'Doe');
     })
     ->exec();
 
 //Post with multipart data
-Request::url('http://localhost:8002')->post(function($req){
-    $req->field('full_name', 'Jane Doe');
-    $req->file('avatar', 'C:\jane_doe.jpg');
+Request::uri('http://localhost:8002')
+  ->post(function(Form $form){
+      $form->field('full_name', 'Jane Doe');
+      $form->file('avatar', 'C:\jane_doe.jpg');
+  })->exec();
+```
+
+You can use [RequestInterface::form()](src/RequestInterface.php) method
+
+```php
+use Guzwrap\Request;
+use Guzwrap\Wrapper\Form;
+use Guzwrap\Wrapper\File;
+
+Request::form(function (Form $form){
+    $form->method('get'); //You can use any http method here
+    $form->action('localhost:8002');
+    $form->field('name', 'Guzwrap');
 })->exec();
 
 //Send file with custom information
-Request::url('http://localhost:8002')->post(function($req){
-    $req->field('full_name', 'Jane Doe');
-    $req->file(function(File $file){
+Request::form(function(Form $form){
+    $form->action('http://localhost:8002');
+    $form->field('full_name', 'Jane Doe');
+    $form->file(function(File $file){
         $file->field('avatar');
         $file->path('C:\jane_doe.jpg');
         $file->name('John_doe.gif');
@@ -137,7 +154,7 @@ use Guzwrap\UserAgent;
 
 //Basic usage
 $request = Request::query('artist', 'Taylor Swift')
-    ->useRequestData([
+    ->useData([
         'headers' => [
             'pass' => 'my-random-pass',
             'user-agent' => 'My Custom Useragent',
@@ -154,7 +171,7 @@ $request1 = Request::userAgent(UserAgent::FIREFOX)
         'realm' => 'admin'
     ]);
 
-$realRequest = Request::useRequestData($request1->getRequestData());
+$realRequest = Request::useData($request1->getData());
 ```
 
 - Use request object
@@ -215,8 +232,7 @@ UserAgent::init()->addFile('/path/to/user-agents.json');
 ```
 
 - Use raw user agent<br/>
-  Note that you can only pass Guzwrap\UserAgent class to the request object if you want use custom user agent, nothing
-  more. <br/>
+  Note that you can only pass Guzwrap\UserAgent class to the request object, nothing more. <br/>
   This may open door to other possibilities in the future.
 
 ```php
@@ -226,4 +242,30 @@ use Guzwrap\Request;
 $request = Request::userAgent(UserAgent::raw('Browser 1.0 (Windows NT 10.0; Win64; x64)'));
 ```
 
-**Enjoy 😊**
+### Extending Guzwrap
+
+```php
+use Guzwrap\Wrapper\Guzzle;use Psr\Http\Message\ResponseInterface;
+
+require 'vendor/autoload.php';
+
+class Client extends Guzzle
+{
+    public static function create(): Client
+    {
+        return new Client();
+    }
+
+    public function boom(): ResponseInterface
+    {
+        echo "Executing request...\n";
+        return parent::exec();
+    }
+}
+
+$client = Client::create()
+    ->get('localhost:8002')
+    ->withCookie()
+    ->boom();
+```
+**Enjoy 😎**
