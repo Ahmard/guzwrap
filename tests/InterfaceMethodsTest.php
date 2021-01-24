@@ -46,7 +46,7 @@ class InterfaceMethodsTest extends TestCase
         $this->assertSame($requestData['guzwrap']['uri'], 'localhost4');
 
         //FORM
-        $request = Request::form(function (Form $form){
+        $request = Request::form(function (Form $form) {
             $form->action('localhost5');
             $form->field('name', 'guzwrap');
         });
@@ -56,7 +56,7 @@ class InterfaceMethodsTest extends TestCase
         $this->assertSame($requestData['query']['name'], 'guzwrap');
 
         //POST
-        $request = Request::form(function (Form $form){
+        $request = Request::form(function (Form $form) {
             $form->action('localhost6');
             $form->method('POST');
             $form->file('php_file', __FILE__);
@@ -171,7 +171,5 @@ class InterfaceMethodsTest extends TestCase
         self::assertSame(3, $data['headers']['third']);
         self::assertFalse($data['verify']);
         self::assertSame('1.1', $data['version']);
-
-        //echo json_encode($request->getData());
     }
 }

@@ -1,6 +1,7 @@
 <?php
+declare(strict_types=1);
 
-namespace Guzwrap\Wrapper;
+namespace Guzwrap\Wrapper\Client;
 
 use Guzwrap\RequestInterface;
 

@@ -10,10 +10,11 @@ class RedirectTest extends TestCase
     public function testMethods()
     {
         $redirect = new Redirect();
-        $closure = function (){};
+        $closure = function () {
+        };
 
         $redirect->max(5);
-        $redirect->trackRedirect();
+        $redirect->trackRedirects();
         $redirect->protocols('http', 'https');
         $redirect->referer();
         $redirect->setValue('name', 'value');

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Guzwrap;
 
@@ -12,7 +13,6 @@ class UserAgent
     public const EDGE = 'edge';
     public const FIREFOX = 'firefox';
     public const INTERNET_EXPLORER = 'ie';
-    public const MOZILLA = 'mozilla';
     public const NETSCAPE = 'netscape';
     public const OPERA = 'opera';
     public const PHOENIX = 'phoenix';
@@ -24,6 +24,23 @@ class UserAgent
 
     protected string $rawUserAgent;
 
+
+    /**
+     * Use your custom user agent
+     * @param string $rawUserAgent
+     * @return UserAgent
+     */
+    public static function raw(string $rawUserAgent): UserAgent
+    {
+        return UserAgent::init([
+            'raw' => $rawUserAgent,
+        ]);
+    }
+
+    public static function init(array $data = []): UserAgent
+    {
+        return new UserAgent($data);
+    }
 
     public function __construct(array $data = [])
     {
@@ -52,23 +69,6 @@ class UserAgent
         $this->uaFiles[$fileInfo->getFilename()] = [
             'path' => $fileInfo->getRealPath(),
         ];
-    }
-
-    /**
-     * Use your custom user agent
-     * @param string $rawUserAgent
-     * @return UserAgent
-     */
-    public static function raw(string $rawUserAgent): UserAgent
-    {
-        return UserAgent::init([
-            'raw' => $rawUserAgent,
-        ]);
-    }
-
-    public static function init(array $data = []): UserAgent
-    {
-        return new UserAgent($data);
     }
 
     /**
@@ -130,12 +130,14 @@ class UserAgent
     {
         $userAgents = $this->getAgents($browser);
 
-        $firstKey = $chosen;
-        if (strpos($chosen, '.')) {
-            $expChosen = explode('.', $chosen);
-            [$firstKey, $secondKey] = $expChosen;
+        if(isset($chosen)){
+            $firstKey = $chosen;
+            if (strpos($chosen, '.')) {
+                $expChosen = explode('.', $chosen);
+                [$firstKey, $secondKey] = $expChosen;
+            }
         }
-
+        
         $totalAgents = count($userAgents) - 1;
 
         //If no ua is chosen, get random

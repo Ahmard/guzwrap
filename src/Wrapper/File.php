@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Guzwrap\Wrapper;
 
@@ -15,17 +16,6 @@ class File
     protected ?string $filePath = null;
 
     /**
-     * Input field name
-     * @param string $name
-     * @return $this
-     */
-    public function field(string $name): File
-    {
-        $this->formValues['name'] = $name;
-        return $this;
-    }
-
-    /**
      * Use file path instead of resources
      * @param string $filePath
      * @return $this
@@ -37,7 +27,6 @@ class File
         return $this;
     }
 
-
     /**
      * Use file resource instead of path
      * @param string $fieldName
@@ -48,6 +37,17 @@ class File
     {
         $this->field($fieldName);
         $this->formValues['contents'] = $resource;
+        return $this;
+    }
+
+    /**
+     * Input field name
+     * @param string $name
+     * @return $this
+     */
+    public function field(string $name): File
+    {
+        $this->formValues['name'] = $name;
         return $this;
     }
 

@@ -1,6 +1,7 @@
 <?php
+declare(strict_types=1);
 
-namespace Guzwrap\Wrapper;
+namespace Guzwrap\Wrapper\Client;
 
 use Guzwrap\RequestInterface;
 use GuzzleHttp\Cookie\CookieJar;
@@ -17,21 +18,17 @@ trait Cookie
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
-    public function withCookie(?CookieJar $jar = null): RequestInterface
+    public function withCookie(?CookieJar $cookieJar = null): RequestInterface
     {
-        if ($jar == null) {
-            $jar = new CookieJar();
-        }
-
-        $this->preferredCookie = $jar;
+        $this->preferredCookie = ($cookieJar ?? new CookieJar());
         return $this;
     }
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function withCookieFile(string $file): RequestInterface
     {
@@ -42,7 +39,7 @@ trait Cookie
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function withCookieSession(string $name): RequestInterface
     {
@@ -53,11 +50,21 @@ trait Cookie
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function withCookieArray(array $cookies, string $domain): RequestInterface
     {
         $this->preferredCookie = CookieJar::fromArray($cookies, $domain);
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     * @return $this
+     */
+    public function withSharedCookie(): RequestInterface
+    {
+        $this->preferredCookie = true;
         return $this;
     }
 

@@ -1,10 +1,12 @@
 <?php
-
+declare(strict_types=1);
 
 namespace Guzwrap;
 
 
 use Guzwrap\Wrapper\Form;
+use Guzwrap\Wrapper\Header;
+use Guzwrap\Wrapper\Redirect;
 use GuzzleHttp\Cookie\CookieJar;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -48,31 +50,42 @@ interface RequestInterface
     public function connect(string $uri): RequestInterface;
 
     /**
-     * Use cookie provided by guzzle
-     * @param CookieJar|null $jar
-     * @return RequestInterface
+     * Send request with cookies, this method stores cookies as an array
+     * @param CookieJar|null $cookieJar Preferred guzzle cookie jar, if none is provided, one will be created for you.
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
      */
-    public function withCookie(?CookieJar $jar = null): RequestInterface;
+    public function withCookie(?CookieJar $cookieJar = null): RequestInterface;
 
     /**
-     * Send request with cookie from file and stored to file
+     * Use a shared cookie jar for all requests.
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
+     * @return $this
+     */
+    public function withSharedCookie(): RequestInterface;
+
+    /**
+     * Persists non-session cookies using a JSON formatted file.
      * @param string $file 'file location/filename'
-     * @return static
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
      */
     public function withCookieFile(string $file): RequestInterface;
 
     /**
-     * Send request with cookie session
+     * Persists cookies in the client session.
      * @param string $name
-     * @return static
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
      */
     public function withCookieSession(string $name): RequestInterface;
 
     /**
-     * Send request with an array of cookies
+     * Manually set cookies into a cookie jar
      * @param array $cookies cookie list
      * @param string $domain
-     * @return static
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
      */
     public function withCookieArray(array $cookies, string $domain): RequestInterface;
 
@@ -172,30 +185,28 @@ interface RequestInterface
     public function userAgent($userAgent, ?string $chosen = null): RequestInterface;
 
     /**
+     * Whether to allow redirects
+     * @link https://docs.guzzlephp.org/en/stable/request-options.html#allow-redirects
+     * @param bool $allowRedirects
+     * @return $this
+     */
+    public function allowRedirects(bool $allowRedirects = true): RequestInterface;
+
+    /**
      * Describes the redirect behavior of a request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#allow-redirects
-     * @param bool $options
+     * @param callable|Redirect $callbackOrRedirect
      * @return $this
      */
-    public function allowRedirects(bool $options = true): RequestInterface;
+    public function redirects($callbackOrRedirect): RequestInterface;
 
     /**
-     * Set redirect handler
-     * @param callable $callback
-     * @return $this
-     */
-    public function redirects(callable $callback): RequestInterface;
-
-    /**
-     * Pass an array of HTTP authentication parameters to use with the request.
-     * The array must contain the username in index [0],
-     * the password in index [1],
-     * and you can optionally provide a built-in authentication type in index [2].
-     * Pass null to disable authentication for a request.
+     * Pass HTTP authentication parameters to use with the request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#auth
-     * @param string|array $optionOrUsername
-     * @param string|null $typeOrPassword
-     * @param string|null $type
+     * @param string|array $optionOrUsername Authentication username, if an array is passed, it must contain the username in index [0],
+     * the password in index [1], and you can optionally provide a built-in authentication type in index [2].
+     * @param string|null $typeOrPassword Authentication password
+     * @param string|null $type Optional built-in authentication type
      * @return $this
      */
     public function auth($optionOrUsername, ?string $typeOrPassword = null, ?string $type = null): RequestInterface;
@@ -230,7 +241,7 @@ interface RequestInterface
 
     /**
      * Set to true or set to a PHP stream returned by fopen() to enable debug output with the handler used to send a request.
-     * For example, when using curi to transfer requests, curi's verbose of CuriOPT_VERBOSE will be emitted.
+     * For example, when using CURL to transfer requests, CURL's verbose of CURLOPT_VERBOSE will be emitted.
      * When using the PHP stream wrapper, stream wrapper notifications will be emitted.
      * If set to true, the output is written to PHP's STDOUT.
      * If a PHP stream is provided, output is written to the stream.
@@ -283,7 +294,7 @@ interface RequestInterface
      * Associative array of headers to add to the request.
      * Each key is the name of a header, and each value is a string or array of strings representing the header field values.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#headers
-     * @param string|array|callable $headersOrKeyOrClosure
+     * @param string|array|callable|Header $headersOrKeyOrClosure
      * @param string|null $value
      * @return $this
      */

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Guzwrap;
 
@@ -49,11 +50,12 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle verify($verify) Describes the SSL certificate verification behavior of a request.
  * @method static Guzzle timeout(float $seconds) Float describing the total timeout of the request in seconds. Use 0 to wait indefinitely (the default behavior).
  * @method static Guzzle version(string $version) Protocol version to use with the request.
- * @method static Guzzle referer(string $refereruri) Set http referrer
+ * @method static Guzzle referer(string $refererUri) Set http referrer
  * @method static Guzzle withCookie(?CookieJar $cookie) Use cookie provided by guzzle
  * @method static Guzzle withCookieFile(string $file) Send request with cookie from file and stored to file
  * @method static Guzzle withCookieSession(string $name) Send request with cookie session
- * @method static Guzzle withCookieArray(array $cookies, string $domain) If user have cookie in hand
+ * @method static Guzzle withCookieArray(array $cookies, string $domain) Use multidimensional array as cookie, [key => value]
+ * @method static Guzzle withSharedCookie() Use single shared cookie across all requests
  * @method static Guzzle get(string $uri) Send GET request
  * @method static Guzzle head(string $uri) Send HEAD request
  * @method static Guzzle post($uriOrClosure) Send POST request
@@ -74,14 +76,14 @@ class Request
      */
     public static function __callStatic(string $name, array $arguments): Guzzle
     {
-        return self::getInstance()->$name(...$arguments);
+        return self::create()->$name(...$arguments);
     }
 
     /**
-     * Get the request wrapper instance
+     * Get guzzle wrapper instance
      * @return Guzzle
      */
-    public static function getInstance(): Guzzle
+    public static function create(): Guzzle
     {
         return new Guzzle();
     }
@@ -94,6 +96,6 @@ class Request
      */
     public function __call(string $name, array $arguments): Guzzle
     {
-        return self::getInstance()->$name(...$arguments);
+        return self::create()->$name(...$arguments);
     }
 }

@@ -8,7 +8,6 @@ This project is founded to make sending request with Guzzle easier and enjoyable
 
 Make sure you have [Composer](http://getcomposer.org) installed.
 
-
 ```bash
 composer require ahmard/guzwrap
 ```
@@ -32,7 +31,7 @@ Request::get('http://localhost:8002')
 ```php
 use Guzwrap\Request;
 
-$instance = Request::getInstance();
+$instance = Request::create();
 //Do something...
 ```
 
@@ -41,7 +40,7 @@ $instance = Request::getInstance();
 ```php
 use Guzwrap\Request;
 
-Request::get('http://localhost:8002')
+Request::create()->get('http://localhost:8002')
     ->withCookie()
     //or use cookie file
     ->withCookieFile('path/to/file')
@@ -52,22 +51,24 @@ Request::get('http://localhost:8002')
         'first_name' => 'Jane',
         'other_names' => 'Doe'
     ], 'localhost')
-    ->exec();
+    //Use single cookie across requests
+    ->withSharedCookie();
 ```
 
 - Handle redirects
 
 ```php
 use Guzwrap\Request;
+use Guzwrap\Wrapper\Redirect;
 
 Request::get('http://localhost:8002')
-    ->redirects(function($wrp){
-        $wrp->max(5);
-        $wrp->strict();
-        $wrp->referer('http://goo.gl');
-        $wrp->protocol('http');
-        $wrp->trackRedirects();
-        $wrp->onRedirect(function(){
+    ->redirects(function(Redirect $redirect){
+        $redirect->max(5);
+        $redirect->strict();
+        $redirect->referer('http://goo.gl');
+        $redirect->protocols('http');
+        $redirect->trackRedirects();
+        $redirect->onRedirect(function(){
             echo "Redirection detected!";
         });
     })->exec();
@@ -77,11 +78,12 @@ Request::get('http://localhost:8002')
 
 ```php
 use Guzwrap\Request;
+use Guzwrap\Wrapper\Header;
 
 Request::get('http://localhost:8002')
-    ->header(function($h){
-        $h->add('hello', 'world');
-        $h->add('planet', 'earth');
+    ->header(function(Header $header){
+        $header->add('hello', 'world');
+        $header->add('planet', 'earth');
     })
     ->exec();
 ```
@@ -117,7 +119,8 @@ Request::uri('http://localhost:8002')
   })->exec();
 ```
 
- You can use [RequestInterface::form()](src/RequestInterface.php) method
+You can use [RequestInterface::form()](src/RequestInterface.php) method
+
 ```php
 use Guzwrap\Request;
 use Guzwrap\Wrapper\Form;
@@ -229,8 +232,7 @@ UserAgent::init()->addFile('/path/to/user-agents.json');
 ```
 
 - Use raw user agent<br/>
-  Note that you can only pass Guzwrap\UserAgent class to the request object, nothing
-  more. <br/>
+  Note that you can only pass Guzwrap\UserAgent class to the request object, nothing more. <br/>
   This may open door to other possibilities in the future.
 
 ```php
@@ -240,4 +242,30 @@ use Guzwrap\Request;
 $request = Request::userAgent(UserAgent::raw('Browser 1.0 (Windows NT 10.0; Win64; x64)'));
 ```
 
-**Enjoy 😊**
+### Extending Guzwrap
+
+```php
+use Guzwrap\Wrapper\Guzzle;use Psr\Http\Message\ResponseInterface;
+
+require 'vendor/autoload.php';
+
+class Client extends Guzzle
+{
+    public static function create(): Client
+    {
+        return new Client();
+    }
+
+    public function boom(): ResponseInterface
+    {
+        echo "Executing request...\n";
+        return parent::exec();
+    }
+}
+
+$client = Client::create()
+    ->get('localhost:8002')
+    ->withCookie()
+    ->boom();
+```
+**Enjoy 😎**

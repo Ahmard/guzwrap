@@ -97,12 +97,12 @@ class Form
                 $values = $fieldName;
                 break;
             case 'string':
-                if (is_resource($filePath)){
+                if (is_resource($filePath)) {
                     $file = new File();
                     $file->name($fieldName);
                     $file->resource($fieldName, $filePath);
                     $values = $file->getValues();
-                }else{
+                } else {
                     $file = new File();
                     $file->field($fieldName);
                     $file->path($filePath);
@@ -124,7 +124,7 @@ class Form
      */
     public function getValues(): array
     {
-        if ('POST' != $this->values['method']){
+        if ('POST' != $this->values['method']) {
             $this->values['query'] = $this->values['form_params'];
             //Since its not POST request, we won't be needing form parameters
             unset($this->values['form_params']);

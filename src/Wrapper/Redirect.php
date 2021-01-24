@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Guzwrap\Wrapper;
 
@@ -72,7 +73,7 @@ class Redirect
      * Whether to track redirects
      * @return $this
      */
-    public function trackRedirect(): Redirect
+    public function trackRedirects(): Redirect
     {
         return $this->setValue('track_redirects', true);
     }

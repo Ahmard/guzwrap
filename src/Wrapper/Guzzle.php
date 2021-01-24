@@ -5,11 +5,17 @@ namespace Guzwrap\Wrapper;
 
 use Guzwrap\RequestInterface;
 use Guzwrap\UserAgent;
-use GuzzleHttp\Client;
+use Guzwrap\Wrapper\Client\Cookie;
+use Guzwrap\Wrapper\Client\Factory;
+use Guzwrap\Wrapper\Client\RequestMethods;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
+/**
+ * Class Guzzle - The main wrapper
+ * @package Guzwrap\Wrapper
+ */
 class Guzzle implements RequestInterface
 {
     //Import cookie handler
@@ -34,13 +40,14 @@ class Guzzle implements RequestInterface
     private string $uri;
     private string $requestMethod;
 
+
     /**
      * @inheritDoc
      * @return $this
      */
     public function request(string $method, $data, array $onceData = []): Guzzle
     {
-        switch ($data){
+        switch ($data) {
             case is_callable($data):
                 $form = new Form();
                 $data($form);
@@ -66,7 +73,7 @@ class Guzzle implements RequestInterface
 
         $this->requestMethod = $method;
 
-        if (is_array($data)){
+        if (is_array($data)) {
             $this->values = array_merge(
                 $this->values,
                 ($data ?? [])
@@ -79,12 +86,26 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
+    public function uri(string $uri): Guzzle
+    {
+        $this->uri = $uri;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function exec(): ResponseInterface
     {
         $requestData = $this->getData();
 
+        //Check if uri() method is used instead of get()
+        if (!isset($requestData['method'])) {
+            $requestData['method'] = 'GET';
+        }
+
         //Verify request method against file upload
-        if (isset($this->values['multipart']) && 'POST' != $requestData['method']){
+        if (isset($this->values['multipart']) && 'POST' != $requestData['method']) {
             throw new InvalidArgumentException("File cannot uploaded through {$requestData['method']} method, try changing request method to POST");
         }
 
@@ -94,7 +115,7 @@ class Guzzle implements RequestInterface
         }
 
         //Create guzzle client
-        $client = new Client($requestData);
+        $client = Factory::create($requestData);
 
         //Verify that request uri is provided
         if (!isset($requestData['guzwrap']['uri'])) {
@@ -136,6 +157,7 @@ class Guzzle implements RequestInterface
         } elseif (isset($this->uri)) {
             $data['guzwrap']['uri'] = $this->uri;
         }
+
         //Set request method
         if (isset($this->requestMethod)) {
             $data['method'] = $this->requestMethod;
@@ -143,7 +165,7 @@ class Guzzle implements RequestInterface
 
         /**
          * Let's check if the request has file
-         * If there is file, we will merge form_params with multipart
+         * If there is file, we will merge form_params with multipart and unset form_params
          */
         $formParams = $data['form_params'] ?? null;
 
@@ -208,15 +230,6 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function uri(string $uri): Guzzle
-    {
-        $this->uri = $uri;
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function userAgent($userAgent, ?string $chosen = null): Guzzle
     {
         //If instance user agent is ued
@@ -258,26 +271,35 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function allowRedirects(bool $options = true): Guzzle
+    public function allowRedirects(bool $allowRedirects = true): Guzzle
     {
+        return $this->addOption('allow_redirects', $allowRedirects);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function redirects($callbackOrRedirect): Guzzle
+    {
+        if (is_callable($callbackOrRedirect)){
+            $redirectObject = new Redirect();
+            $callbackOrRedirect($redirectObject);
+            $options = $redirectObject->getValues();
+        }elseif ($callbackOrRedirect instanceof Redirect){
+            $options = $callbackOrRedirect->getValues();
+        }else{
+            $class = __CLASS__;
+            $method = __METHOD__;
+            throw new InvalidArgumentException("{$class}::{$method}() only accept parameter of type callable and \\Guzwrap\\Wrapper\\Redirect");
+        }
+
         return $this->addOption('allow_redirects', $options);
     }
 
     /**
      * @inheritDoc
      */
-    public function redirects(callable $callback): Guzzle
-    {
-        $redirectObject = new Redirect();
-        $callback($redirectObject);
-        $options = $redirectObject->getValues();
-        return $this->addOption('allow_redirects', $options);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function auth($optionOrUsername, string $typeOrPassword = null, string $type = null): Guzzle
+    public function auth($optionOrUsername, ?string $typeOrPassword = null, ?string $type = null): Guzzle
     {
         $option = $optionOrUsername;
         if (!is_array($optionOrUsername)) {
@@ -308,9 +330,9 @@ class Guzzle implements RequestInterface
     {
         $option = $optionOrFilePath;
         if (!is_array($optionOrFilePath)) {
-            if (null == $password){
+            if (null == $password) {
                 $option = $optionOrFilePath;
-            }else{
+            } else {
                 $option = array();
                 $option[] = $optionOrFilePath;
                 $option[] = $password;
@@ -555,10 +577,15 @@ class Guzzle implements RequestInterface
                     $headerObj = new Header();
                     $headersOrKeyOrClosure($headerObj);
                     $options = array_merge(($this->values['headers'] ?? []), $headerObj->getValues());
+                } elseif ($headersOrKeyOrClosure instanceof Header) {
+                    $options = $headersOrKeyOrClosure->getValues();
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
-                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                    throw new InvalidArgumentException("
+                        First parameter of {$className}::{$methodName}() must be of type 
+                        \Guzwrap\Wrapper\Header, callable, array or string.
+                    ");
                 }
                 break;
             case 'array':
@@ -568,8 +595,11 @@ class Guzzle implements RequestInterface
                 $options[$headersOrKeyOrClosure] = $value;
                 break;
             default:
-                throw new InvalidArgumentException(
-                    "First parameter must be an object of \Guzwrap\Core\Header or an array of headers or name of header
+                $className = __CLASS__;
+                $methodName = __METHOD__;
+                throw new InvalidArgumentException("
+                    First parameter of {$className}::{$methodName}() must be of type 
+                    \Guzwrap\Wrapper\Header, callable, array or string.
                 ");
         }
 
