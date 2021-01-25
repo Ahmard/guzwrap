@@ -41,11 +41,11 @@ $instance = Request::create();
 use Guzwrap\Request;
 
 Request::create()->get('http://localhost:8002')
-    ->withCookie()
+    ->withCookie([]false)
     //or use cookie file
     ->withCookieFile('path/to/file')
     //use cookie session
-    ->withCookieSession('session_name')
+    ->withCookieSession('session_name',false)
     //use array too
     ->withCookieArray([
         'first_name' => 'Jane',
@@ -240,6 +240,44 @@ use Guzwrap\UserAgent;
 use Guzwrap\Request;
 
 $request = Request::userAgent(UserAgent::raw('Browser 1.0 (Windows NT 10.0; Win64; x64)'));
+```
+
+### Stack
+Manipulating Guzzle [StackHandler](https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#handlerstack) 
+
+```php
+use Guzwrap\Request;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
+
+Request::stack(function (HandlerStack $stack){
+    $stack->setHandler(new CurlHandler());
+    //Do something here
+});
+```
+
+### Middleware
+Adding [middleware](https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#middleware) to GuzzleHttp requests
+
+```php
+use Guzwrap\Request;
+use Psr\Http\Message\RequestInterface;
+
+/**
+ * An example of middleware that add header to requests
+ * @link https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html
+ */
+Request::middleware(function(){
+    return function (callable $handler){
+        return function (
+            RequestInterface $request,
+            array $options
+        ) use ($handler){
+            $request = $request->withHeader('X-Guzwrap-Version', 'V2');
+            return $handler($request, $options);
+        };
+    };
+});
 ```
 
 ### Extending Guzwrap

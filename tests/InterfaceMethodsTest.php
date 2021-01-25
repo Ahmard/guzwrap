@@ -8,6 +8,8 @@ use Guzwrap\Request;
 use Guzwrap\UserAgent;
 use Guzwrap\Wrapper\Form;
 use Guzwrap\Wrapper\Guzzle;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Stream;
 use PHPUnit\Framework\TestCase;
 
@@ -72,6 +74,7 @@ class InterfaceMethodsTest extends TestCase
         $callback1 = fn() => 1;
         $callback2 = fn() => 2;
         $callback3 = fn() => 3;
+        $callback4 = fn() => 4;
         $stream = new Stream(fopen(__FILE__, 'r'));
         $testRequest = Request::header(['third' => 3]);
 
@@ -123,12 +126,20 @@ class InterfaceMethodsTest extends TestCase
         $request->useRequest($testRequest);
         $request->verify(false);
         $request->version('1.1');
+        $request->curlOption('CURLOPT_INTERFACE', 'xxx.xxx.xxx.xxx');
+        $request->stack(function (HandlerStack $handlerStack){
+            $handlerStack->setHandler(new CurlHandler());
+        });
+        $request->middleware($callback4);
 
 
         //Perform the test
         $data = $request->getData();
+        //uri
         self::assertSame('localhost7', $data['guzwrap']['uri']);
+        //referer
         self::assertSame('localhost6', $data['headers']['Referer']);
+        //form_params
         self::assertSame([
             'name' => 'Guzwrap',
             'type' => 'lib'
@@ -141,35 +152,68 @@ class InterfaceMethodsTest extends TestCase
             'name' => 'value',
             'first' => 1
         ], $data['query']);
+        //RequestInterface::addOption()
         self::assertSame('my-value', $data['my-option-name']);
+        //auth
         self::assertSame(['uname', 'pass'], $data['auth']);
+        //allow_redirects [true/false]
         self::assertFalse($data['allow_redirects']);
+        //cert
         self::assertSame('./certificate.cert', $data['cert']);
+        //connect_timeout
         self::assertSame(24.5, $data['connect_timeout']);
+        //debug
         self::assertTrue($data['debug']);
+        //decode_content
         self::assertFalse($data['decode_content']);
+        //delay
         self::assertSame(23.5, $data['delay']);
+        //expect
         self::assertSame(100, $data['expect']);
+        //force_ip_resolve
         self::assertSame('v6', $data['force_ip_resolve']);
+        //http_errors
         self::assertFalse($data['http_errors']);
+        //idn_conversion
         self::assertFalse($data['idn_conversion']);
+        ////RequestInterface::multipart()
         self::assertSame([
             'one' => 'two',
             'three' => 'four'
         ], $data['multipart']);
+        //headers
         self::assertSame($callback1, $data['on_headers']);
+        //progress
         self::assertSame($callback2, $data['progress']);
+        //on_stats
         self::assertSame($callback3, $data['on_stats']);
+        //headers
         self::assertSame('MY UA', $data['headers']['user-agent']);
+        //read_timeout
         self::assertSame(43.1, $data['read_timeout']);
+        //proxy
         self::assertSame('my.local.proxy', $data['proxy']);
+        //save_to
         self::assertSame($stream, $data['save_to']);
+        //ssl_key
         self::assertSame(__FILE__, $data['ssl_key']);
+        //synchronous
         self::assertFalse($data['synchronous']);
+        //timeout
         self::assertSame(23.2, $data['timeout']);
+        //RequestInterface::useData()
         self::assertSame('second-value', $data['second-option']);
+        //headers
         self::assertSame(3, $data['headers']['third']);
+        //verify
         self::assertFalse($data['verify']);
+        //version
         self::assertSame('1.1', $data['version']);
+        //curl
+        self::assertSame([
+            'CURLOPT_INTERFACE' => 'xxx.xxx.xxx.xxx',
+        ], $request->getData()['curl']);
+        //handler
+        self::assertInstanceOf(HandlerStack::class, $request->getData()['handler']);
     }
 }

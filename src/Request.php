@@ -56,6 +56,10 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle withCookieSession(string $name) Send request with cookie session
  * @method static Guzzle withCookieArray(array $cookies, string $domain) Use multidimensional array as cookie, [key => value]
  * @method static Guzzle withSharedCookie() Use single shared cookie across all requests
+ * @method static Guzzle curlOption($option, $value) Define cUrl options
+ * @method static Guzzle streamContext($callbackOrStreamContext) Control request stream option
+ * @method static Guzzle stack($callbackOrStack) A handler stack represents a stack of middleware to apply to a base handler function.
+ * @method static Guzzle middleware(callable $callback) Middleware augments the functionality of handlers by invoking them in the process of generating responses.
  * @method static Guzzle get(string $uri) Send GET request
  * @method static Guzzle head(string $uri) Send HEAD request
  * @method static Guzzle post($uriOrClosure) Send POST request

@@ -18,7 +18,7 @@ class CookieTest extends TestCase
         //RequestInterface::withCookie()
         $jar = new CookieJar();
         $request = new Guzzle();
-        $request->withCookie($jar);
+        $request->withCookie($jar, false, []);
         self::assertSame($jar, $request->getData()['cookies']);
 
         //RequestInterface::withCookieArray()
@@ -36,7 +36,7 @@ class CookieTest extends TestCase
 
         //RequestInterface::withCookieSession()
         $request = new Guzzle();
-        $request->withCookieSession('PHP_SES_ID');
+        $request->withCookieSession('PHP_SES_ID', false);
         self::assertInstanceOf(SessionCookieJar::class, $request->getData()['cookies']);
 
         //RequestInterface::withSharedCookie()
