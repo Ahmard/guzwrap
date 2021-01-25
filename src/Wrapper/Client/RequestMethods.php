@@ -12,6 +12,7 @@ trait RequestMethods
 {
     /**
      * @inheritDoc
+     * @return $this
      */
     public function get(string $uri): RequestInterface
     {
@@ -20,7 +21,7 @@ trait RequestMethods
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function head(string $uri): RequestInterface
     {
@@ -29,7 +30,7 @@ trait RequestMethods
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function post($formOrClosure): RequestInterface
     {
@@ -38,7 +39,7 @@ trait RequestMethods
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function put(string $uri): RequestInterface
     {
@@ -47,7 +48,7 @@ trait RequestMethods
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function delete(string $uri): RequestInterface
     {
@@ -56,7 +57,7 @@ trait RequestMethods
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function connect(string $uri): RequestInterface
     {
@@ -65,7 +66,7 @@ trait RequestMethods
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function options(string $uri): RequestInterface
     {
@@ -74,7 +75,7 @@ trait RequestMethods
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function trace(string $uri): RequestInterface
     {
@@ -83,7 +84,7 @@ trait RequestMethods
 
     /**
      * @inheritDoc
-     * @return static
+     * @return $this
      */
     public function patch(string $uri): RequestInterface
     {
