@@ -37,10 +37,10 @@ class Form
 
     /**
      * @param string|File $name
-     * @param string|null $value
+     * @param string|int|float|null $value
      * @return Form
      */
-    public function input($name, ?string $value = null): Form
+    public function input($name, $value = null): Form
     {
         return $this->field($name, $value);
     }
@@ -49,10 +49,10 @@ class Form
      * Add input filed
      * @param mixed $name name of input or multidimensional array of ['name' => 'value'].
      * You can alternatively pass Guzwrap\Wrapper\File object to this parameter too
-     * @param string|null $value
+     * @param string|int|float|null $value
      * @return $this
      */
-    public function field($name, ?string $value = null): Form
+    public function field($name, $value = null): Form
     {
         if (is_array($name)) {
             $this->values['form_params'] = array_merge($this->values['form_params'], $name);
