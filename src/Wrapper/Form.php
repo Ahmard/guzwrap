@@ -11,6 +11,7 @@ class Form
     protected array $values = [
         'method' => 'GET',
         'form_params' => [],
+        'guzwrap' => [],
     ];
 
     /**
@@ -20,7 +21,7 @@ class Form
      */
     public function action(string $uri): Form
     {
-        $this->values['uri'] = $uri;
+        $this->values['guzwrap']['uri'] = $uri;
         return $this;
     }
 
@@ -77,7 +78,6 @@ class Form
      */
     public function file($fieldName, $filePath = null): self
     {
-        $values = [];
         $dataType = gettype($fieldName);
         switch ($dataType) {
             case 'object':
