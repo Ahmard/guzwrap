@@ -41,11 +41,11 @@ $instance = Request::create();
 use Guzwrap\Request;
 
 Request::create()->get('http://localhost:8002')
-    ->withCookie()
+    ->withCookie([]false)
     //or use cookie file
     ->withCookieFile('path/to/file')
     //use cookie session
-    ->withCookieSession('session_name')
+    ->withCookieSession('session_name',false)
     //use array too
     ->withCookieArray([
         'first_name' => 'Jane',

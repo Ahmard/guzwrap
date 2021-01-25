@@ -52,8 +52,8 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle version(string $version) Protocol version to use with the request.
  * @method static Guzzle referer(string $refererUri) Set http referrer
  * @method static Guzzle withCookie(?CookieJar $cookie) Use cookie provided by guzzle
- * @method static Guzzle withCookieFile(string $cookieFile, bool $storeSessionCookies = false) Send request with cookie from file and stored to file
- * @method static Guzzle withCookieSession(string $sessionKey, bool $storeSessionCookies = false) Send request with cookie session
+ * @method static Guzzle withCookieFile(string $file) Send request with cookie from file and stored to file
+ * @method static Guzzle withCookieSession(string $name) Send request with cookie session
  * @method static Guzzle withCookieArray(array $cookies, string $domain) Use multidimensional array as cookie, [key => value]
  * @method static Guzzle withSharedCookie() Use single shared cookie across all requests
  * @method static Guzzle curlOption($option, $value) Define cUrl options
