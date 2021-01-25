@@ -84,7 +84,7 @@ interface RequestInterface
      * @return $this
      * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
      */
-    public function withCookieSession(string $sessionKey, bool $storeSessionCookies): RequestInterface;
+    public function withCookieSession(string $sessionKey, bool $storeSessionCookies = false): RequestInterface;
 
     /**
      * Manually set cookies into a cookie jar
