@@ -20,9 +20,9 @@ trait Cookie
      * @inheritDoc
      * @return $this
      */
-    public function withCookie(?CookieJar $cookieJar = null): RequestInterface
+    public function withCookie(?CookieJar $cookieJar = null, bool $strictMode = false, array $cookieArray = []): RequestInterface
     {
-        $this->preferredCookie = ($cookieJar ?? new CookieJar());
+        $this->preferredCookie = ($cookieJar ?? new CookieJar($strictMode, $cookieArray));
         return $this;
     }
 
@@ -30,9 +30,9 @@ trait Cookie
      * @inheritDoc
      * @return $this
      */
-    public function withCookieFile(string $file): RequestInterface
+    public function withCookieFile(string $cookieFile, bool $storeSessionCookies = false): RequestInterface
     {
-        $jar = new FileCookieJar($file);
+        $jar = new FileCookieJar($cookieFile, $storeSessionCookies);
         $this->preferredCookie = $jar;
         return $this;
     }
@@ -41,9 +41,9 @@ trait Cookie
      * @inheritDoc
      * @return $this
      */
-    public function withCookieSession(string $name): RequestInterface
+    public function withCookieSession(string $sessionKey, bool $storeSessionCookies): RequestInterface
     {
-        $jar = new SessionCookieJar($name, true);
+        $jar = new SessionCookieJar($sessionKey, $storeSessionCookies);
         $this->preferredCookie = $jar;
         return $this;
     }

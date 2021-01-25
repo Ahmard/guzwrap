@@ -3,11 +3,14 @@ declare(strict_types=1);
 
 namespace Guzwrap\Wrapper;
 
+use Closure;
 use Guzwrap\RequestInterface;
 use Guzwrap\UserAgent;
 use Guzwrap\Wrapper\Client\Cookie;
 use Guzwrap\Wrapper\Client\Factory;
 use Guzwrap\Wrapper\Client\RequestMethods;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -281,13 +284,13 @@ class Guzzle implements RequestInterface
      */
     public function redirects($callbackOrRedirect): Guzzle
     {
-        if (is_callable($callbackOrRedirect)){
+        if (is_callable($callbackOrRedirect)) {
             $redirectObject = new Redirect();
             $callbackOrRedirect($redirectObject);
             $options = $redirectObject->getValues();
-        }elseif ($callbackOrRedirect instanceof Redirect){
+        } elseif ($callbackOrRedirect instanceof Redirect) {
             $options = $callbackOrRedirect->getValues();
-        }else{
+        } else {
             $class = __CLASS__;
             $method = __METHOD__;
             throw new InvalidArgumentException("{$class}::{$method}() only accept parameter of type callable and \\Guzwrap\\Wrapper\\Redirect");
@@ -464,7 +467,6 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
-     *
      */
     public function query($queriesOrName, string $queryValue = null): Guzzle
     {
@@ -604,5 +606,72 @@ class Guzzle implements RequestInterface
         }
 
         return $this->addOption('headers', $options);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function curlOption($option, $value): Guzzle
+    {
+        if (is_string($option)) {
+            $option = [$option => $value];
+        }
+
+        return $this->addOption('curl', $option);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function streamContext($callbackOrStreamContext): Guzzle
+    {
+        if (is_array($callbackOrStreamContext)) {
+            return $this->addOption('stream_context', $callbackOrStreamContext);
+        } //If callable is passed
+        elseif (is_callable($callbackOrStreamContext)) {
+            $streamContext = new StreamContext();
+            $callbackOrStreamContext($streamContext);
+            return $this->addOption('stream_context', $streamContext->getValues());
+        } //If instance of StreamContext is passed
+        elseif ($callbackOrStreamContext instanceof StreamContext) {
+            return $this->addOption('stream_context', $callbackOrStreamContext->getValues());
+        } else {
+            $class = __CLASS__;
+            $method = __METHOD__;
+            throw new InvalidArgumentException("
+                {$class}::{$method}() parameter must be of type array, callable 
+                or an instance of Guzwrap\Wrapper\StreamContext
+            ");
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function middleware(callable $callback): Guzzle
+    {
+        return $this->stack(function (HandlerStack $handlerStack) use ($callback) {
+            $handlerStack->push($callback);
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function stack($callbackOrStack): Guzzle
+    {
+        if ($callbackOrStack instanceof Closure) {
+            $stack = new HandlerStack();
+            $callbackOrStack($stack);
+            if (!$stack->hasHandler()) {
+                $stack->setHandler(new CurlHandler());
+            }
+        } elseif ($callbackOrStack instanceof HandlerStack) {
+            if (!$callbackOrStack->hasHandler()) {
+                $callbackOrStack->setHandler(new CurlHandler());
+            }
+        }
+
+        return $this->addOption('handler', $stack ?? $callbackOrStack);
     }
 }

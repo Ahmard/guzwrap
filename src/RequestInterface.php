@@ -7,10 +7,12 @@ namespace Guzwrap;
 use Guzwrap\Wrapper\Form;
 use Guzwrap\Wrapper\Header;
 use Guzwrap\Wrapper\Redirect;
+use Guzwrap\Wrapper\StreamContext;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Throwable;
 
 interface RequestInterface
 {
@@ -52,10 +54,12 @@ interface RequestInterface
     /**
      * Send request with cookies, this method stores cookies as an array
      * @param CookieJar|null $cookieJar Preferred guzzle cookie jar, if none is provided, one will be created for you.
+     * @param bool $strictMode
+     * @param array $cookieArray
      * @return $this
      * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
      */
-    public function withCookie(?CookieJar $cookieJar = null): RequestInterface;
+    public function withCookie(?CookieJar $cookieJar = null, bool $strictMode = false, array $cookieArray = []): RequestInterface;
 
     /**
      * Use a shared cookie jar for all requests.
@@ -66,19 +70,21 @@ interface RequestInterface
 
     /**
      * Persists non-session cookies using a JSON formatted file.
-     * @param string $file 'file location/filename'
+     * @param string $cookieFile 'file location/filename'
+     * @param bool $storeSessionCookies
      * @return $this
      * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
      */
-    public function withCookieFile(string $file): RequestInterface;
+    public function withCookieFile(string $cookieFile, bool $storeSessionCookies = false): RequestInterface;
 
     /**
      * Persists cookies in the client session.
-     * @param string $name
+     * @param string $sessionKey
+     * @param bool $storeSessionCookies
      * @return $this
      * @link https://docs.guzzlephp.org/en/stable/quickstart.html?highlight=cookies#cookies
      */
-    public function withCookieSession(string $name): RequestInterface;
+    public function withCookieSession(string $sessionKey, bool $storeSessionCookies): RequestInterface;
 
     /**
      * Manually set cookies into a cookie jar
@@ -158,7 +164,7 @@ interface RequestInterface
     /**
      * Execute the request
      * @return ResponseInterface
-     * @throws Throwable
+     * @throws GuzzleException
      */
     public function exec(): ResponseInterface;
 
@@ -461,4 +467,43 @@ interface RequestInterface
      * @return $this
      */
     public function referer(string $refererUri): RequestInterface;
+
+    /**
+     * cURL offers a huge number of customizable options.
+     * While Guzzle normalizes many of these options across different handlers, there are times when you need to set custom cURL options.
+     * This can be accomplished by passing an associative array of cURL settings in the curl key of a request.
+     * @param string|array $option cURL option name,  eg: CURLOPT_INTERFACE
+     * @param mixed $value
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/faq.html#how-can-i-add-custom-curl-options
+     */
+    public function curlOption($option, $value): RequestInterface;
+
+    /**
+     * Control request stream option
+     * @param array|callable|StreamContext $callbackOrStreamContext
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/faq.html#how-can-i-add-custom-stream-context-options
+     */
+    public function streamContext($callbackOrStreamContext): RequestInterface;
+
+    /**
+     * A handler stack represents a stack of middleware to apply to a base handler function.
+     * You can push middleware to the stack to add to the top of the stack, and unshift middleware onto the stack to add to the bottom of the stack.
+     * When the stack is resolved, the handler is pushed onto the stack.
+     * Each value is then popped off of the stack, wrapping the previous value popped off of the stack.
+     * @param callable|HandlerStack $callbackOrStack
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#handlerstack
+     */
+    public function stack($callbackOrStack): RequestInterface;
+
+    /**
+     * Middleware augments the functionality of handlers by invoking them in the process of generating responses.
+     * Middleware is implemented as a higher order function.
+     * @param callable $callback
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#middleware
+     */
+    public function middleware(callable $callback): RequestInterface;
 }
