@@ -41,7 +41,7 @@ trait Cookie
      * @inheritDoc
      * @return $this
      */
-    public function withCookieSession(string $sessionKey, bool $storeSessionCookies): RequestInterface
+    public function withCookieSession(string $sessionKey, bool $storeSessionCookies = false): RequestInterface
     {
         $jar = new SessionCookieJar($sessionKey, $storeSessionCookies);
         $this->preferredCookie = $jar;
