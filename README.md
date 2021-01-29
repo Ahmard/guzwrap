@@ -114,6 +114,7 @@ Request::uri('http://localhost:8002')
 //Post with multipart data
 Request::uri('http://localhost:8002')
   ->post(function(Form $form){
+      $form->method('post');
       $form->field('full_name', 'Jane Doe');
       $form->file('avatar', 'C:\jane_doe.jpg');
   })->exec();
@@ -134,6 +135,7 @@ Request::form(function (Form $form){
 
 //Send file with custom information
 Request::form(function(Form $form){
+    $form->method('post');
     $form->action('http://localhost:8002');
     $form->field('full_name', 'Jane Doe');
     $form->file(function(File $file){
