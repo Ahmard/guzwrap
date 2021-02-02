@@ -122,6 +122,9 @@ Request::uri('http://localhost:8002')
 
 You can use [RequestInterface::form()](src/RequestInterface.php) method
 
+**Note:**  If you did not set form method to post, 
+all your input fields will be treated as url queries.
+
 ```php
 use Guzwrap\Request;
 use Guzwrap\Wrapper\Form;
@@ -285,7 +288,8 @@ Request::middleware(function(){
 ### Extending Guzwrap
 
 ```php
-use Guzwrap\Wrapper\Guzzle;use Psr\Http\Message\ResponseInterface;
+use Guzwrap\Wrapper\Guzzle;
+use Psr\Http\Message\ResponseInterface;
 
 require 'vendor/autoload.php';
 
