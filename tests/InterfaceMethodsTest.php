@@ -8,6 +8,7 @@ use Guzwrap\Request;
 use Guzwrap\UserAgent;
 use Guzwrap\Wrapper\Form;
 use Guzwrap\Wrapper\Guzzle;
+use Guzwrap\Wrapper\Pool;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Stream;
@@ -131,6 +132,7 @@ class InterfaceMethodsTest extends TestCase
             $handlerStack->setHandler(new CurlHandler());
         });
         $request->middleware($callback4);
+        $request->baseUri('http://localhostx:9999');
 
 
         //Perform the test
@@ -215,5 +217,6 @@ class InterfaceMethodsTest extends TestCase
         ], $request->getData()['curl']);
         //handler
         self::assertInstanceOf(HandlerStack::class, $request->getData()['handler']);
+        self::assertSame('http://localhostx:9999', $data['base_uri']);
     }
 }

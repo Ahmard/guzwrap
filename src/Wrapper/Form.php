@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Guzwrap\Wrapper;
 
 
+use Closure;
 use InvalidArgumentException;
 
 class Form
@@ -71,8 +72,8 @@ class Form
 
     /**
      * Add file input
-     * @param string|array|File|callable $fieldName File field name, array of file data retrieved from \Guzwrap\Wrapper\File,
-     * An object of \Guzwrap\Wrapper\File or callable
+     * @param string|array|File|Closure $fieldName File field name, array of file data retrieved from \Guzwrap\Wrapper\File,
+     * An object of \Guzwrap\Wrapper\File or Closure
      * @param string|resource|null $filePath
      * @return $this
      */
@@ -90,7 +91,7 @@ class Form
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
-                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid Closure, array or string.");
                 }
                 break;
             case 'array':

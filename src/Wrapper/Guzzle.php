@@ -6,11 +6,16 @@ namespace Guzwrap\Wrapper;
 use Closure;
 use Guzwrap\RequestInterface;
 use Guzwrap\UserAgent;
+use Guzwrap\Wrapper\Client\Concurrent;
 use Guzwrap\Wrapper\Client\Cookie;
 use Guzwrap\Wrapper\Client\Factory;
 use Guzwrap\Wrapper\Client\RequestMethods;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Promise\PromisorInterface;
+use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -46,6 +51,81 @@ class Guzzle implements RequestInterface
 
     /**
      * @inheritDoc
+     */
+    public function exec(): ResponseInterface
+    {
+        $preparedData = $this->prepareRequestData();
+        $requestData = $preparedData['requestData'];
+        //Create guzzle client
+        $client = Factory::create($requestData);
+
+        //Execute the request
+        return $client->request(
+            $requestData['method'],
+            $requestData['guzwrap']['uri'],
+            $preparedData['onceData']
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function execAsync(): PromiseInterface
+    {
+        $preparedData = $this->prepareRequestData();
+        $requestData = $preparedData['requestData'];
+
+        //Create guzzle client
+        $client = Factory::create($requestData);
+
+        //Execute the request
+        return $client->requestAsync(
+            $requestData['method'],
+            $requestData['guzwrap']['uri'],
+            $preparedData['onceData']
+        );
+    }
+
+    /**
+     * Prepare guzwrap
+     * @return array
+     */
+    protected function prepareRequestData(): array
+    {
+        $requestData = $this->getData();
+
+        //Check if uri() method is used instead of get()
+        if (!isset($requestData['method'])) {
+            $requestData['method'] = 'GET';
+        }
+
+        //Verify request method against file upload
+        if (isset($this->values['multipart']) && 'POST' != $requestData['method']) {
+            throw new InvalidArgumentException("File cannot uploaded through {$requestData['method']} method, try changing request method to POST");
+        }
+
+        //Verify request user-agent
+        if (!array_key_exists('user-agent', $requestData['headers'])) {
+            $requestData['headers']['user-agent'] = UserAgent::init()->getRandom();
+        }
+
+        //Verify that request uri is provided
+        if (!isset($requestData['guzwrap']['uri'])) {
+            throw new InvalidArgumentException('You cannot send request without providing request uri.');
+        }
+
+        //Retrieve and unset one-timed-options
+        $onceValues = $this->oneTimedOption;
+        unset($this->oneTimedOption);
+
+        return [
+            'requestData' => $requestData,
+            'onceData' => $onceValues
+        ];
+    }
+
+    /**
+     * @inheritDoc
      * @return $this
      */
     public function request(string $method, $data, array $onceData = []): Guzzle
@@ -68,7 +148,7 @@ class Guzzle implements RequestInterface
                 $this->uri($data);
                 break;
             default:
-                throw new InvalidArgumentException("Argument 2 passed to \\Guzwrap\\Wrapper\\Guzzle must be of type string, array, callable or an instance of \\Guzwrap\\Wrapper\\Guzzle");
+                throw new InvalidArgumentException("Argument 2 passed to \\Guzwrap\\Wrapper\\Guzzle must be of type string, array, Closure or an instance of \\Guzwrap\\Wrapper\\Guzzle");
         }
 
         //lets check if its one timed options are provided
@@ -89,52 +169,19 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function uri(string $uri): Guzzle
+    public function baseUri($baseUri): Guzzle
     {
-        $this->uri = $uri;
+        $this->values['base_uri'] = $baseUri;
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function exec(): ResponseInterface
+    public function uri(string $uri): Guzzle
     {
-        $requestData = $this->getData();
-
-        //Check if uri() method is used instead of get()
-        if (!isset($requestData['method'])) {
-            $requestData['method'] = 'GET';
-        }
-
-        //Verify request method against file upload
-        if (isset($this->values['multipart']) && 'POST' != $requestData['method']) {
-            throw new InvalidArgumentException("File cannot uploaded through {$requestData['method']} method, try changing request method to POST");
-        }
-
-        //Verify request user-agent
-        if (!array_key_exists('user-agent', $requestData['headers'])) {
-            $requestData['headers']['user-agent'] = UserAgent::init()->getRandom();
-        }
-
-        //Create guzzle client
-        $client = Factory::create($requestData);
-
-        //Verify that request uri is provided
-        if (!isset($requestData['guzwrap']['uri'])) {
-            throw new InvalidArgumentException('You cannot send request without providing request uri.');
-        }
-
-        //Retrieve and unset one-timed-options
-        $onceValues = $this->oneTimedOption;
-        unset($this->oneTimedOption);
-
-        //Execute the request
-        return $client->request(
-            $requestData['method'],
-            $requestData['guzwrap']['uri'],
-            $onceValues
-        );
+        $this->uri = $uri;
+        return $this;
     }
 
     /**
@@ -293,7 +340,7 @@ class Guzzle implements RequestInterface
         } else {
             $class = __CLASS__;
             $method = __METHOD__;
-            throw new InvalidArgumentException("{$class}::{$method}() only accept parameter of type callable and \\Guzwrap\\Wrapper\\Redirect");
+            throw new InvalidArgumentException("{$class}::{$method}() only accept parameter of type Closure and \\Guzwrap\\Wrapper\\Redirect");
         }
 
         return $this->addOption('allow_redirects', $options);
@@ -436,7 +483,7 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function onHeaders(callable $callback): Guzzle
+    public function onHeaders(Closure $callback): Guzzle
     {
         return $this->addOption('on_headers', $callback);
     }
@@ -444,7 +491,7 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function onStats(callable $callback): Guzzle
+    public function onStats(Closure $callback): Guzzle
     {
         return $this->addOption('on_stats', $callback);
     }
@@ -452,7 +499,7 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function onProgress(callable $callback): Guzzle
+    public function onProgress(Closure $callback): Guzzle
     {
         return $this->addOption('progress', $callback);
     }
@@ -586,7 +633,7 @@ class Guzzle implements RequestInterface
                     $methodName = __METHOD__;
                     throw new InvalidArgumentException("
                         First parameter of {$className}::{$methodName}() must be of type 
-                        \Guzwrap\Wrapper\Header, callable, array or string.
+                        \Guzwrap\Wrapper\Header, Closure, array or string.
                     ");
                 }
                 break;
@@ -601,7 +648,7 @@ class Guzzle implements RequestInterface
                 $methodName = __METHOD__;
                 throw new InvalidArgumentException("
                     First parameter of {$className}::{$methodName}() must be of type 
-                    \Guzwrap\Wrapper\Header, callable, array or string.
+                    \Guzwrap\Wrapper\Header, Closure, array or string.
                 ");
         }
 
@@ -627,7 +674,7 @@ class Guzzle implements RequestInterface
     {
         if (is_array($callbackOrStreamContext)) {
             return $this->addOption('stream_context', $callbackOrStreamContext);
-        } //If callable is passed
+        } //If Closure is passed
         elseif (is_callable($callbackOrStreamContext)) {
             $streamContext = new StreamContext();
             $callbackOrStreamContext($streamContext);
@@ -639,7 +686,7 @@ class Guzzle implements RequestInterface
             $class = __CLASS__;
             $method = __METHOD__;
             throw new InvalidArgumentException("
-                {$class}::{$method}() parameter must be of type array, callable 
+                {$class}::{$method}() parameter must be of type array, Closure 
                 or an instance of Guzwrap\Wrapper\StreamContext
             ");
         }
@@ -648,7 +695,7 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function middleware(callable $callback): Guzzle
+    public function middleware(Closure $callback): Guzzle
     {
         return $this->stack(function (HandlerStack $handlerStack) use ($callback) {
             $handlerStack->push($callback);
@@ -673,5 +720,41 @@ class Guzzle implements RequestInterface
         }
 
         return $this->addOption('handler', $stack ?? $callbackOrStack);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws GuzzleException
+     */
+    public function concurrent(...$requests): Concurrent
+    {
+        $promises = [];
+        foreach ($requests as $name => $request) {
+            if ($request instanceof Guzzle) {
+                $promises[$name] = $request->execAsync();
+            } else {
+                $promises[$name] = $request;
+            }
+        }
+
+        return new Concurrent($promises);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function pool($poolOrCallback): PromisorInterface
+    {
+        if ($poolOrCallback instanceof Pool) {
+            $values = $poolOrCallback->getValues();
+        } else {
+            $pool = new Pool();
+            $poolOrCallback($pool);
+            $values = $pool->getValues();
+        }
+
+        $requestData = $this->prepareRequestData();
+        $client = Factory::create($requestData);
+        return new \GuzzleHttp\Pool($client, $values['requests']);
     }
 }

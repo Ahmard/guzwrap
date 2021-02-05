@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Guzwrap;
 
+use Closure;
+use Guzwrap\Wrapper\Client\Concurrent;
 use Guzwrap\Wrapper\Form;
 use Guzwrap\Wrapper\Guzzle;
 use GuzzleHttp\Cookie\CookieJar;
@@ -15,12 +17,12 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle useData(array $requestData) Merge an array of request data with provided one
  * @method static Guzzle addOption(string $name, mixed $value) Add option to this request
  * @method static Guzzle request(string $type, mixed $argsOrClosure) Make http request
- * @method static Guzzle exec() Execute the request
+ * @method static Concurrent concurrent(...$promises) Concurrent Execute requests concurrently.
  * @method static Guzzle uri(string $uri) Set request uri
- * @method static Guzzle form(callable|Form $callback) Create form
+ * @method static Guzzle form(Closure|Form $callback) Create form
  * @method static Guzzle userAgent(string $userAgent, ?string $chosen = null) Choose user agent
  * @method static Guzzle allowRedirects($options) Whether to allow redirect during this request
- * @method static Guzzle redirects(callable $callback) Describes the redirect behavior of a request.
+ * @method static Guzzle redirects(Closure $callback) Describes the redirect behavior of a request.
  * @method static Guzzle auth($optionOrUsername, $typeOrPassword, $type) Set request authentication credentials
  * @method static Guzzle body(mixed $body) he body option is used to control the body of an entity enclosing request (e.g., PUT, POST, PATCH).
  * @method static Guzzle cert($optionOrFile, $password) Set to a string to specify the path to a file containing a PEM formatted client side certificate.
@@ -31,14 +33,14 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle expect($expect) Controls the behavior of the "Expect: 100-Continue" header.
  * @method static Guzzle forceIPResolve($version) Set to "v4" if you want the HTTP handlers to use only ipv4 protocol or "v6" for ipv6 protocol.
  * @method static Guzzle formParams(array $params) Used to send an application/x-www-form-uriencoded POST request.
- * @method static Guzzle header(string|array|callable $headersOrKeyOrClosure, ?string $value = null) Associative array of headers to add to the request.
+ * @method static Guzzle header(string|array|Closure $headersOrKeyOrClosure, ?string $value = null) Associative array of headers to add to the request.
  * @method static Guzzle httpErrors($bool) Set to false to disable throwing exceptions on an HTTP protocol errors (i.e., 4xx and 5xx responses).
  * @method static Guzzle idnConversion($bool) Internationalized Domain Name (IDN) support (enabled by default if intl extension is available).
  * @method static Guzzle json(string $json) The json option is used to easily upload JSON encoded data as the body of a request.
  * @method static Guzzle multipart(array $data) Sets the body of the request to a multipart/form-data form.
- * @method static Guzzle onHeaders(callable $callback) A callable that is invoked when the HTTP headers of the response have been received but the body has not yet begun to download.
- * @method static Guzzle onStats(callable $callback) Allows you to get access to transfer statistics of a request and access the lower level transfer details of the handler associated with your client.
- * @method static Guzzle onProgress(callable $callback) Monitor request progress
+ * @method static Guzzle onHeaders(Closure $callback) A Closure that is invoked when the HTTP headers of the response have been received but the body has not yet begun to download.
+ * @method static Guzzle onStats(Closure $callback) Allows you to get access to transfer statistics of a request and access the lower level transfer details of the handler associated with your client.
+ * @method static Guzzle onProgress(Closure $callback) Monitor request progress
  * @method static Guzzle proxy(string $uri) Pass a string to specify an HTTP proxy, or an array to specify different proxies for different protocols.
  * @method static Guzzle query(string|array $queriesOrName, ?string $queryValue = null) Associative array of query string values or query string to add to the request.
  * @method static Guzzle readTimeout(float $seconds) Float describing the timeout to use when reading a streamed body
@@ -59,7 +61,7 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle curlOption($option, $value) Define cUrl options
  * @method static Guzzle streamContext($callbackOrStreamContext) Control request stream option
  * @method static Guzzle stack($callbackOrStack) A handler stack represents a stack of middleware to apply to a base handler function.
- * @method static Guzzle middleware(callable $callback) Middleware augments the functionality of handlers by invoking them in the process of generating responses.
+ * @method static Guzzle middleware(Closure $callback) Middleware augments the functionality of handlers by invoking them in the process of generating responses.
  * @method static Guzzle get(string $uri) Send GET request
  * @method static Guzzle head(string $uri) Send HEAD request
  * @method static Guzzle post($uriOrClosure) Send POST request
@@ -76,9 +78,9 @@ class Request
      * handle first static call
      * @param string $name
      * @param array $arguments
-     * @return Guzzle
+     * @return Guzzle|Concurrent
      */
-    public static function __callStatic(string $name, array $arguments): Guzzle
+    public static function __callStatic(string $name, array $arguments)
     {
         return self::create()->$name(...$arguments);
     }

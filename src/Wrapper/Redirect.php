@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Guzwrap\Wrapper;
 
+use Closure;
+
 class Redirect
 {
     protected array $values = array();
@@ -61,10 +63,10 @@ class Redirect
 
     /**
      * Listen to redirect event
-     * @param callable $callback
+     * @param Closure $callback
      * @return $this
      */
-    public function onRedirect(callable $callback): Redirect
+    public function onRedirect(Closure $callback): Redirect
     {
         return $this->setValue('on_redirect', $callback);
     }
