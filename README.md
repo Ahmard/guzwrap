@@ -194,6 +194,120 @@ $request2 = Request::query('language', 'PHP')
 $realRequest = Request::useRequest($request1, $request2); //Has request 1 and request 2 data
 ```
 
+### Asynchronous Operations
+
+```php
+use Guzwrap\Request;
+use Psr\Http\Message\ResponseInterface;
+
+$promise = Request::get('localhost:8002')
+    ->query('wraps', 'guzzlehttp')
+    ->query('name', 'guzwrap')
+    ->execAsync();
+
+$promise->then(function (ResponseInterface $response){
+    var_dump($response->getBody()->getContents());
+});
+
+$promise->wait();
+```
+
+- **Running multiple requests at once**
+  
+  * Create [PHP Built-in Server](https://www.php.net/manual/en/features.commandline.webserver.php)
+  ```bash
+  php -S localhost:8002 index.php
+  ```
+
+  * Create an **index.php** file and put below code into it
+  ```php
+  \sleep($_GET['sleep']);
+  echo $_GET['sleep'];
+  ```
+  
+  * Crate **test.php** and put below code into it
+  ```php
+  use Guzwrap\Request;
+  use Psr\Http\Message\ResponseInterface;
+  
+  $promise = Request::get('localhost:8002')
+      ->query('wraps', 'guzzlehttp')
+      ->query('sleep', 2)
+      ->execAsync();
+  
+  $promise->then(function (ResponseInterface $response){
+      var_dump($response->getBody()->getContents());
+  });
+  
+  $promise2 = Request::get('localhost:8002')
+      ->query('name', 'guzwrap')
+      ->query('wraps', 'guzzlehttp')
+      ->query('sleep', 1)
+      ->execAsync();
+  
+  $promise2->then(function (ResponseInterface $response){
+      var_dump($response->getBody()->getContents());
+  });
+  
+  $promise->wait();
+  $promise2->wait();
+  ```
+  
+  * Now run the **test.php** file
+  ```bash
+  php test.php
+  ```
+
+- **Using [Concurrent](src/Wrapper/Client/Concurrent.php) class
+  to manage [Guzzle Request Concurrency](https://docs.guzzlephp.org/en/stable/quickstart.html#concurrent-requests)**
+  ```php
+  use Guzwrap\Request;  
+
+  $promise1 = Request::get('localhost:8002')->execAsync();
+  $promise2 = Request::get('localhost:8002')->execAsync();
+  
+  $responses = Request::concurrent($promise1, $promise2)->unwrap();
+  
+  echo $responses[0]->getStatusCode() . PHP_EOL;
+  echo $responses[1]->getReasonPhrase() . PHP_EOL;
+  ```
+
+* **Using request pool**
+  ```php
+  use Guzwrap\Request;
+  use Guzwrap\Wrapper\Pool;
+  use GuzzleHttp\Exception\RequestException;
+  use GuzzleHttp\Psr7\Response;
+  use Psr\Http\Message\ResponseInterface;
+  
+  require 'vendor/autoload.php';
+  
+  $pool = Request::pool(function (Pool $pool) {
+      $pool->concurrency(5);
+      $pool->fulfilled(function (Response $response, $index) {
+          // this is delivered each successful response
+      });
+      $pool->rejected(function (RequestException $reason, $index) {
+          // this is delivered each failed request
+      });
+  
+      $pool->requests(function ($total) {
+          $uri = 'http://127.0.0.1:8002';
+          for ($i = 0; $i < $total; $i++) {
+              yield new \GuzzleHttp\Psr7\Request('GET', $uri);
+          }
+      });
+  });
+  
+  $promise = $pool->promise();
+  
+  $promise->then(function (ResponseInterface $response){
+      echo "{$response->getStatusCode()} @ {$response->getReasonPhrase()}\n";
+  });
+  
+  $promise->wait();
+  ```
+
 ### UserAgent
 
 We provide custom user agents to help send request easily.

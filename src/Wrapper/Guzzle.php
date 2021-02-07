@@ -6,11 +6,15 @@ namespace Guzwrap\Wrapper;
 use Closure;
 use Guzwrap\RequestInterface;
 use Guzwrap\UserAgent;
+use Guzwrap\Wrapper\Client\Concurrent;
 use Guzwrap\Wrapper\Client\Cookie;
 use Guzwrap\Wrapper\Client\Factory;
 use Guzwrap\Wrapper\Client\RequestMethods;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Promise\PromisorInterface;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -42,63 +46,32 @@ class Guzzle implements RequestInterface
     protected array $requestsToBeUsed = [];
     private string $uri;
     private string $requestMethod;
+    private bool $isPoolUsed = false;
 
-
-    /**
-     * @inheritDoc
-     * @return $this
-     */
-    public function request(string $method, $data, array $onceData = []): Guzzle
-    {
-        switch ($data) {
-            case is_callable($data):
-                $form = new Form();
-                $data($form);
-                //let the $data hold the retrieved options
-                $data = $form->getValues();
-                //If uri from post method is used
-                if (isset($data['action'])) {
-                    $this->uri = $data['action'];
-                }
-                break;
-            case ($data instanceof Form):
-                $data = $data->getValues();
-                break;
-            case is_string($data):
-                $this->uri($data);
-                break;
-            default:
-                throw new InvalidArgumentException("Argument 2 passed to \\Guzwrap\\Wrapper\\Guzzle must be of type string, array, callable or an instance of \\Guzwrap\\Wrapper\\Guzzle");
-        }
-
-        //lets check if its one timed options are provided
-        $this->oneTimedOption = $onceData;
-
-        $this->requestMethod = $method;
-
-        if (is_array($data)) {
-            $this->values = array_merge(
-                $this->values,
-                ($data ?? [])
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function uri(string $uri): Guzzle
-    {
-        $this->uri = $uri;
-        return $this;
-    }
 
     /**
      * @inheritDoc
      */
     public function exec(): ResponseInterface
+    {
+        $preparedData = $this->prepareRequestData();
+        $requestData = $preparedData['requestData'];
+        //Create guzzle client
+        $client = Factory::create($requestData);
+
+        //Execute the request
+        return $client->request(
+            $requestData['method'],
+            $requestData['guzwrap']['uri'],
+            $preparedData['onceData']
+        );
+    }
+
+    /**
+     * Prepare guzwrap
+     * @return array
+     */
+    protected function prepareRequestData(): array
     {
         $requestData = $this->getData();
 
@@ -117,11 +90,8 @@ class Guzzle implements RequestInterface
             $requestData['headers']['user-agent'] = UserAgent::init()->getRandom();
         }
 
-        //Create guzzle client
-        $client = Factory::create($requestData);
-
         //Verify that request uri is provided
-        if (!isset($requestData['guzwrap']['uri'])) {
+        if (!isset($requestData['guzwrap']['uri']) && !$this->isPoolUsed) {
             throw new InvalidArgumentException('You cannot send request without providing request uri.');
         }
 
@@ -129,12 +99,10 @@ class Guzzle implements RequestInterface
         $onceValues = $this->oneTimedOption;
         unset($this->oneTimedOption);
 
-        //Execute the request
-        return $client->request(
-            $requestData['method'],
-            $requestData['guzwrap']['uri'],
-            $onceValues
-        );
+        return [
+            'requestData' => $requestData,
+            'onceData' => $onceValues
+        ];
     }
 
     /**
@@ -194,6 +162,66 @@ class Guzzle implements RequestInterface
     public function useData(array $options): Guzzle
     {
         $this->values = array_merge_recursive($this->values, $options);
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     * @return $this
+     */
+    public function request(string $method, $data, array $onceData = []): Guzzle
+    {
+        switch ($data) {
+            case is_callable($data):
+                $form = new Form();
+                $data($form);
+                //let the $data hold the retrieved options
+                $data = $form->getValues();
+                //If uri from post method is used
+                if (isset($data['action'])) {
+                    $this->uri = $data['action'];
+                }
+                break;
+            case ($data instanceof Form):
+                $data = $data->getValues();
+                break;
+            case is_string($data):
+                $this->uri($data);
+                break;
+            default:
+                throw new InvalidArgumentException("Argument 2 passed to \\Guzwrap\\Wrapper\\Guzzle must be of type string, array, Closure or an instance of \\Guzwrap\\Wrapper\\Guzzle");
+        }
+
+        //lets check if its one timed options are provided
+        $this->oneTimedOption = $onceData;
+
+        $this->requestMethod = $method;
+
+        if (is_array($data)) {
+            $this->values = array_merge(
+                $this->values,
+                ($data ?? [])
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function uri(string $uri): Guzzle
+    {
+        $this->uri = $uri;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function baseUri($baseUri): Guzzle
+    {
+        $this->values['base_uri'] = $baseUri;
         return $this;
     }
 
@@ -293,7 +321,7 @@ class Guzzle implements RequestInterface
         } else {
             $class = __CLASS__;
             $method = __METHOD__;
-            throw new InvalidArgumentException("{$class}::{$method}() only accept parameter of type callable and \\Guzwrap\\Wrapper\\Redirect");
+            throw new InvalidArgumentException("{$class}::{$method}() only accept parameter of type Closure and \\Guzwrap\\Wrapper\\Redirect");
         }
 
         return $this->addOption('allow_redirects', $options);
@@ -436,7 +464,7 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function onHeaders(callable $callback): Guzzle
+    public function onHeaders(Closure $callback): Guzzle
     {
         return $this->addOption('on_headers', $callback);
     }
@@ -444,7 +472,7 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function onStats(callable $callback): Guzzle
+    public function onStats(Closure $callback): Guzzle
     {
         return $this->addOption('on_stats', $callback);
     }
@@ -452,7 +480,7 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function onProgress(callable $callback): Guzzle
+    public function onProgress(Closure $callback): Guzzle
     {
         return $this->addOption('progress', $callback);
     }
@@ -586,7 +614,7 @@ class Guzzle implements RequestInterface
                     $methodName = __METHOD__;
                     throw new InvalidArgumentException("
                         First parameter of {$className}::{$methodName}() must be of type 
-                        \Guzwrap\Wrapper\Header, callable, array or string.
+                        \Guzwrap\Wrapper\Header, Closure, array or string.
                     ");
                 }
                 break;
@@ -601,7 +629,7 @@ class Guzzle implements RequestInterface
                 $methodName = __METHOD__;
                 throw new InvalidArgumentException("
                     First parameter of {$className}::{$methodName}() must be of type 
-                    \Guzwrap\Wrapper\Header, callable, array or string.
+                    \Guzwrap\Wrapper\Header, Closure, array or string.
                 ");
         }
 
@@ -627,7 +655,7 @@ class Guzzle implements RequestInterface
     {
         if (is_array($callbackOrStreamContext)) {
             return $this->addOption('stream_context', $callbackOrStreamContext);
-        } //If callable is passed
+        } //If Closure is passed
         elseif (is_callable($callbackOrStreamContext)) {
             $streamContext = new StreamContext();
             $callbackOrStreamContext($streamContext);
@@ -639,7 +667,7 @@ class Guzzle implements RequestInterface
             $class = __CLASS__;
             $method = __METHOD__;
             throw new InvalidArgumentException("
-                {$class}::{$method}() parameter must be of type array, callable 
+                {$class}::{$method}() parameter must be of type array, Closure 
                 or an instance of Guzwrap\Wrapper\StreamContext
             ");
         }
@@ -648,7 +676,7 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function middleware(callable $callback): Guzzle
+    public function middleware(Closure $callback): Guzzle
     {
         return $this->stack(function (HandlerStack $handlerStack) use ($callback) {
             $handlerStack->push($callback);
@@ -673,5 +701,62 @@ class Guzzle implements RequestInterface
         }
 
         return $this->addOption('handler', $stack ?? $callbackOrStack);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws GuzzleException
+     */
+    public function concurrent(...$requests): Concurrent
+    {
+        $promises = [];
+        foreach ($requests as $name => $request) {
+            if ($request instanceof Guzzle) {
+                $promises[$name] = $request->execAsync();
+            } else {
+                $promises[$name] = $request;
+            }
+        }
+
+        return new Concurrent($promises);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function execAsync(): PromiseInterface
+    {
+        $preparedData = $this->prepareRequestData();
+        $requestData = $preparedData['requestData'];
+
+        //Create guzzle client
+        $client = Factory::create($requestData);
+
+        //Execute the request
+        return $client->requestAsync(
+            $requestData['method'],
+            $requestData['guzwrap']['uri'],
+            $preparedData['onceData']
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function pool($callbackOrPool): PromisorInterface
+    {
+        $this->isPoolUsed = true;
+
+        if ($callbackOrPool instanceof Pool) {
+            $values = $callbackOrPool->getValues();
+        } else {
+            $pool = new Pool();
+            $callbackOrPool($pool);
+            $values = $pool->getValues();
+        }
+
+        $requestData = $this->prepareRequestData();
+        $client = Factory::create($requestData);
+        return new \GuzzleHttp\Pool($client, $values['requests']);
     }
 }

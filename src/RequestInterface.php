@@ -4,15 +4,22 @@ declare(strict_types=1);
 namespace Guzwrap;
 
 
+use Closure;
+use Guzwrap\Wrapper\Client\Concurrent;
 use Guzwrap\Wrapper\Form;
+use Guzwrap\Wrapper\Guzzle;
 use Guzwrap\Wrapper\Header;
+use Guzwrap\Wrapper\Pool;
 use Guzwrap\Wrapper\Redirect;
 use Guzwrap\Wrapper\StreamContext;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Promise\PromisorInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 interface RequestInterface
 {
@@ -32,7 +39,7 @@ interface RequestInterface
 
     /**
      * Send POST request
-     * @param callable|Form $formOrClosure
+     * @param Closure|Form $formOrClosure
      * @return $this
      */
     public function post($formOrClosure): RequestInterface;
@@ -134,7 +141,7 @@ interface RequestInterface
     /**
      * Make http request
      * @param string $method A request method, e.g: GET, POST...
-     * @param string|callable|array|Form $data A callable or an array of request data
+     * @param string|Closure|array|Form $data A Closure or an array of request data
      * @param array $onceData This data will be one, i.e used for this request only
      * @return $this
      */
@@ -162,11 +169,33 @@ interface RequestInterface
     public function getData(): array;
 
     /**
-     * Execute the request
+     * Execute the constructed request, this request will be executed in synchronous manner
      * @return ResponseInterface
      * @throws GuzzleException
      */
     public function exec(): ResponseInterface;
+
+    /**
+     * Execute the constructed request in asynchronous manner.
+     * The promise returned by these methods implements the Promises/A+ spec,
+     * provided by the Guzzle promises library. This means that you can chain then() calls off of the promise.
+     * These then calls are either fulfilled with a successful Psr\Http\Message\ResponseInterface or rejected with an exception.
+     * @return PromiseInterface
+     * @throws GuzzleException
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html#async-requests
+     */
+    public function execAsync(): PromiseInterface;
+
+    /**
+     * Base URI of the client that is merged into relative URIs.
+     * Can be a string or instance of UriInterface.
+     * When a relative URI is provided to a client,
+     * the client will combine the base URI with the relative URI using the rules described in RFC 3986, section 5.2.
+     * @param string|UriInterface $baseUri
+     * @return $this
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html#creating-a-client
+     */
+    public function baseUri($baseUri): RequestInterface;
 
     /**
      * Set request uri
@@ -177,7 +206,7 @@ interface RequestInterface
 
     /**
      * Create form
-     * @param callable|Form $callback
+     * @param Closure|Form $callback
      * @return $this
      */
     public function form($callback): RequestInterface;
@@ -201,7 +230,7 @@ interface RequestInterface
     /**
      * Describes the redirect behavior of a request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#allow-redirects
-     * @param callable|Redirect $callbackOrRedirect
+     * @param Closure|Redirect $callbackOrRedirect
      * @return $this
      */
     public function redirects($callbackOrRedirect): RequestInterface;
@@ -300,7 +329,7 @@ interface RequestInterface
      * Associative array of headers to add to the request.
      * Each key is the name of a header, and each value is a string or array of strings representing the header field values.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#headers
-     * @param string|array|callable|Header $headersOrKeyOrClosure
+     * @param string|array|Closure|Header $headersOrKeyOrClosure
      * @param string|null $value
      * @return $this
      */
@@ -341,32 +370,32 @@ interface RequestInterface
     public function multipart(array $data): RequestInterface;
 
     /**
-     * A callable that is invoked when the HTTP headers of the response have been received but the body has not yet begun to download.
+     * A Closure that is invoked when the HTTP headers of the response have been received but the body has not yet begun to download.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#on-headers
-     * @param callable $callback
+     * @param Closure $callback
      * @return $this
      */
-    public function onHeaders(callable $callback): RequestInterface;
+    public function onHeaders(Closure $callback): RequestInterface;
 
     /**
      * Allows you to get access to transfer statistics of a request and access the lower level transfer details of the handler associated
-     * with your client. on_stats is a callable that is invoked when a handler has finished sending a request.
+     * with your client. on_stats is a Closure that is invoked when a handler has finished sending a request.
      * The callback is invoked with transfer statistics about the request, the response received,
      * or the error encountered. Included in the data is the total amount of time taken to send the request.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#on-stats
      * Listen to stats event
-     * @param callable $callback
+     * @param Closure $callback
      * @return $this
      */
-    public function onStats(callable $callback): RequestInterface;
+    public function onStats(Closure $callback): RequestInterface;
 
     /**
      * Defines a function to invoke when transfer progress is made.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#progress
-     * @param callable $callback
+     * @param Closure $callback
      * @return $this
      */
-    public function onProgress(callable $callback): RequestInterface;
+    public function onProgress(Closure $callback): RequestInterface;
 
     /**
      * Pass a string to specify an HTTP proxy, or an array to specify different proxies for different protocols.
@@ -481,7 +510,7 @@ interface RequestInterface
 
     /**
      * Control request stream option
-     * @param array|callable|StreamContext $callbackOrStreamContext
+     * @param array|Closure|StreamContext $callbackOrStreamContext
      * @return $this
      * @link https://docs.guzzlephp.org/en/stable/faq.html#how-can-i-add-custom-stream-context-options
      */
@@ -492,7 +521,7 @@ interface RequestInterface
      * You can push middleware to the stack to add to the top of the stack, and unshift middleware onto the stack to add to the bottom of the stack.
      * When the stack is resolved, the handler is pushed onto the stack.
      * Each value is then popped off of the stack, wrapping the previous value popped off of the stack.
-     * @param callable|HandlerStack $callbackOrStack
+     * @param Closure|HandlerStack $callbackOrStack
      * @return $this
      * @link https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#handlerstack
      */
@@ -501,9 +530,24 @@ interface RequestInterface
     /**
      * Middleware augments the functionality of handlers by invoking them in the process of generating responses.
      * Middleware is implemented as a higher order function.
-     * @param callable $callback
+     * @param Closure $callback
      * @return $this
      * @link https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#middleware
      */
-    public function middleware(callable $callback): RequestInterface;
+    public function middleware(Closure $callback): RequestInterface;
+
+    /**
+     * You can send multiple requests concurrently using promises and asynchronous requests.
+     * @param Guzzle|PromiseInterface ...$requests
+     * @return Concurrent
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html#concurrent-requests
+     */
+    public function concurrent(...$requests): Concurrent;
+
+    /**
+     * You can use pool when you have an indeterminate amount of requests you wish to send.
+     * @param Pool|Closure $callbackOrPool
+     * @return PromisorInterface
+     */
+    public function pool($callbackOrPool): PromisorInterface;
 }

@@ -79,7 +79,7 @@ class File
                 } else {
                     $className = __CLASS__;
                     $methodName = __METHOD__;
-                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid callable, array or string.");
+                    throw new InvalidArgumentException("First parameter of {$className}::{$methodName}() must be valid Closure, array or string.");
                 }
                 break;
             case 'array':
