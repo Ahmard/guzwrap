@@ -13,7 +13,7 @@ class PoolTest extends TestCase
         $callable1 = fn() => time();
         $callable2 = fn() => time();
         $callable3 = fn() => time();
-        $pool->request($callable1);
+        $pool->requests($callable1);
         $pool->addOption('method', 'get');
         $pool->addOption([
             'query' => [
@@ -26,7 +26,7 @@ class PoolTest extends TestCase
         $pool->rejected($callable3);
 
         $values = $pool->getValues();
-        self::assertSame($callable1, $values['request']);
+        self::assertSame($callable1, $values['requests']);
         self::assertSame('get', $values['options']['method']);
         self::assertSame([
             'a' => 1,

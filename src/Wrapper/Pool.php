@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 
 namespace Guzwrap\Wrapper;
@@ -52,9 +53,9 @@ class Pool
      * @param Request|Closure $request
      * @return $this
      */
-    public function request($request): Pool
+    public function requests($request): Pool
     {
-        $this->values['request'] = $request;
+        $this->values['requests'] = $request;
         return $this;
     }
 

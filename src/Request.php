@@ -7,8 +7,11 @@ use Closure;
 use Guzwrap\Wrapper\Client\Concurrent;
 use Guzwrap\Wrapper\Form;
 use Guzwrap\Wrapper\Guzzle;
+use Guzwrap\Wrapper\Pool;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Promise\PromisorInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * This Class servers as proxy to Guzzle\Wrapper which help provide convenience usage to this package
@@ -17,7 +20,9 @@ use Psr\Http\Message\StreamInterface;
  * @method static Guzzle useData(array $requestData) Merge an array of request data with provided one
  * @method static Guzzle addOption(string $name, mixed $value) Add option to this request
  * @method static Guzzle request(string $type, mixed $argsOrClosure) Make http request
- * @method static Concurrent concurrent(...$promises) Concurrent Execute requests concurrently.
+ * @method static Concurrent concurrent(...$promises) You can send multiple requests concurrently using promises and asynchronous requests.
+ * @method static PromisorInterface pool(Pool|Closure $poolOrCallback) You can use pool when you have an indeterminate amount of requests you wish to send.
+ * @method static Guzzle baseUri(string|UriInterface $uri) Set request base uri
  * @method static Guzzle uri(string $uri) Set request uri
  * @method static Guzzle form(Closure|Form $callback) Create form
  * @method static Guzzle userAgent(string $userAgent, ?string $chosen = null) Choose user agent

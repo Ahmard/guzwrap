@@ -15,7 +15,6 @@ use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Promise\PromisorInterface;
-use GuzzleHttp\Psr7\Request;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -47,6 +46,7 @@ class Guzzle implements RequestInterface
     protected array $requestsToBeUsed = [];
     private string $uri;
     private string $requestMethod;
+    private bool $isPoolUsed = false;
 
 
     /**
@@ -61,25 +61,6 @@ class Guzzle implements RequestInterface
 
         //Execute the request
         return $client->request(
-            $requestData['method'],
-            $requestData['guzwrap']['uri'],
-            $preparedData['onceData']
-        );
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function execAsync(): PromiseInterface
-    {
-        $preparedData = $this->prepareRequestData();
-        $requestData = $preparedData['requestData'];
-
-        //Create guzzle client
-        $client = Factory::create($requestData);
-
-        //Execute the request
-        return $client->requestAsync(
             $requestData['method'],
             $requestData['guzwrap']['uri'],
             $preparedData['onceData']
@@ -110,7 +91,7 @@ class Guzzle implements RequestInterface
         }
 
         //Verify that request uri is provided
-        if (!isset($requestData['guzwrap']['uri'])) {
+        if (!isset($requestData['guzwrap']['uri']) && !$this->isPoolUsed) {
             throw new InvalidArgumentException('You cannot send request without providing request uri.');
         }
 
@@ -122,66 +103,6 @@ class Guzzle implements RequestInterface
             'requestData' => $requestData,
             'onceData' => $onceValues
         ];
-    }
-
-    /**
-     * @inheritDoc
-     * @return $this
-     */
-    public function request(string $method, $data, array $onceData = []): Guzzle
-    {
-        switch ($data) {
-            case is_callable($data):
-                $form = new Form();
-                $data($form);
-                //let the $data hold the retrieved options
-                $data = $form->getValues();
-                //If uri from post method is used
-                if (isset($data['action'])) {
-                    $this->uri = $data['action'];
-                }
-                break;
-            case ($data instanceof Form):
-                $data = $data->getValues();
-                break;
-            case is_string($data):
-                $this->uri($data);
-                break;
-            default:
-                throw new InvalidArgumentException("Argument 2 passed to \\Guzwrap\\Wrapper\\Guzzle must be of type string, array, Closure or an instance of \\Guzwrap\\Wrapper\\Guzzle");
-        }
-
-        //lets check if its one timed options are provided
-        $this->oneTimedOption = $onceData;
-
-        $this->requestMethod = $method;
-
-        if (is_array($data)) {
-            $this->values = array_merge(
-                $this->values,
-                ($data ?? [])
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function baseUri($baseUri): Guzzle
-    {
-        $this->values['base_uri'] = $baseUri;
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function uri(string $uri): Guzzle
-    {
-        $this->uri = $uri;
-        return $this;
     }
 
     /**
@@ -241,6 +162,66 @@ class Guzzle implements RequestInterface
     public function useData(array $options): Guzzle
     {
         $this->values = array_merge_recursive($this->values, $options);
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     * @return $this
+     */
+    public function request(string $method, $data, array $onceData = []): Guzzle
+    {
+        switch ($data) {
+            case is_callable($data):
+                $form = new Form();
+                $data($form);
+                //let the $data hold the retrieved options
+                $data = $form->getValues();
+                //If uri from post method is used
+                if (isset($data['action'])) {
+                    $this->uri = $data['action'];
+                }
+                break;
+            case ($data instanceof Form):
+                $data = $data->getValues();
+                break;
+            case is_string($data):
+                $this->uri($data);
+                break;
+            default:
+                throw new InvalidArgumentException("Argument 2 passed to \\Guzwrap\\Wrapper\\Guzzle must be of type string, array, Closure or an instance of \\Guzwrap\\Wrapper\\Guzzle");
+        }
+
+        //lets check if its one timed options are provided
+        $this->oneTimedOption = $onceData;
+
+        $this->requestMethod = $method;
+
+        if (is_array($data)) {
+            $this->values = array_merge(
+                $this->values,
+                ($data ?? [])
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function uri(string $uri): Guzzle
+    {
+        $this->uri = $uri;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function baseUri($baseUri): Guzzle
+    {
+        $this->values['base_uri'] = $baseUri;
         return $this;
     }
 
@@ -743,13 +724,34 @@ class Guzzle implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function pool($poolOrCallback): PromisorInterface
+    public function execAsync(): PromiseInterface
     {
-        if ($poolOrCallback instanceof Pool) {
-            $values = $poolOrCallback->getValues();
+        $preparedData = $this->prepareRequestData();
+        $requestData = $preparedData['requestData'];
+
+        //Create guzzle client
+        $client = Factory::create($requestData);
+
+        //Execute the request
+        return $client->requestAsync(
+            $requestData['method'],
+            $requestData['guzwrap']['uri'],
+            $preparedData['onceData']
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function pool($callbackOrPool): PromisorInterface
+    {
+        $this->isPoolUsed = true;
+
+        if ($callbackOrPool instanceof Pool) {
+            $values = $callbackOrPool->getValues();
         } else {
             $pool = new Pool();
-            $poolOrCallback($pool);
+            $callbackOrPool($pool);
             $values = $pool->getValues();
         }
 

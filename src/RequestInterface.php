@@ -537,16 +537,17 @@ interface RequestInterface
     public function middleware(Closure $callback): RequestInterface;
 
     /**
-     * Execute requests concurrently.
+     * You can send multiple requests concurrently using promises and asynchronous requests.
      * @param Guzzle|PromiseInterface ...$requests
      * @return Concurrent
+     * @link https://docs.guzzlephp.org/en/stable/quickstart.html#concurrent-requests
      */
     public function concurrent(...$requests): Concurrent;
 
     /**
-     * You can use the \GuzzleHttp\Pool object when you have an indeterminate amount of requests you wish to send.
-     * @param Pool|Closure $poolOrCallback
+     * You can use pool when you have an indeterminate amount of requests you wish to send.
+     * @param Pool|Closure $callbackOrPool
      * @return PromisorInterface
      */
-    public function pool($poolOrCallback): PromisorInterface;
+    public function pool($callbackOrPool): PromisorInterface;
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 
 namespace Guzwrap\Wrapper\Client;
@@ -7,6 +8,7 @@ namespace Guzwrap\Wrapper\Client;
 use Exception;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Promise\Utils;
+use Psr\Http\Message\ResponseInterface;
 use Throwable;
 
 class Concurrent
@@ -48,7 +50,7 @@ class Concurrent
      * order the promises were provided). An exception is thrown if any of the
      * promises are rejected.
      *
-     * @return array
+     * @return array<ResponseInterface>
      *
      * @throws Exception on error
      * @throws Throwable on error in PHP >=7
