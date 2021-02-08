@@ -5,7 +5,7 @@ Guzwrap is an object-oriented wrapper around [GuzzleHttp](http://guzzlephp.org/)
 This project is founded to make sending request with Guzzle easier and enjoyable.
 
 ## Supported PHP Versions
-Guzwrap requires **>=7.4 or >=8.0**.
+Guzwrap require **PHP >= 7.4 or >= 8.0**.
 
 # Installation
 
