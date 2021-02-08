@@ -244,7 +244,6 @@ $promise->wait();
   
   $promise2 = Request::get('localhost:8002')
       ->query('name', 'guzwrap')
-      ->query('wraps', 'guzzlehttp')
       ->query('sleep', 1)
       ->execAsync();
   
