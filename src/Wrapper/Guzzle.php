@@ -171,7 +171,7 @@ class Guzzle implements RequestInterface
      */
     public function request(string $method, $data, array $onceData = []): Guzzle
     {
-        switch ($data) {
+        switch (true) {
             case is_callable($data):
                 $form = new Form();
                 $data($form);
@@ -758,5 +758,13 @@ class Guzzle implements RequestInterface
         $requestData = $this->prepareRequestData();
         $client = Factory::create($requestData);
         return new \GuzzleHttp\Pool($client, $values['requests']);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->getData();
     }
 }

@@ -22,5 +22,9 @@
         "psr-4": {
             "Guzwrap\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse"
     }
 }

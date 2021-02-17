@@ -79,8 +79,7 @@ class Form
      */
     public function file($fieldName, $filePath = null): self
     {
-        $dataType = gettype($fieldName);
-        switch ($dataType) {
+        switch (gettype($fieldName)) {
             case 'object':
                 if (is_callable($fieldName)) {
                     $file = new File();
