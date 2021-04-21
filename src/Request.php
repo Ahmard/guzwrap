@@ -41,7 +41,7 @@ use Psr\Http\Message\UriInterface;
  * @method static Guzzle header(string|array|Closure $headersOrKeyOrClosure, ?string $value = null) Associative array of headers to add to the request.
  * @method static Guzzle httpErrors($bool) Set to false to disable throwing exceptions on an HTTP protocol errors (i.e., 4xx and 5xx responses).
  * @method static Guzzle idnConversion($bool) Internationalized Domain Name (IDN) support (enabled by default if intl extension is available).
- * @method static Guzzle json(string $json) The json option is used to easily upload JSON encoded data as the body of a request.
+ * @method static Guzzle json(string|array|object $json) The json option is used to easily upload JSON encoded data as the body of a request.
  * @method static Guzzle multipart(array $data) Sets the body of the request to a multipart/form-data form.
  * @method static Guzzle onHeaders(Closure $callback) A Closure that is invoked when the HTTP headers of the response have been received but the body has not yet begun to download.
  * @method static Guzzle onStats(Closure $callback) Allows you to get access to transfer statistics of a request and access the lower level transfer details of the handler associated with your client.

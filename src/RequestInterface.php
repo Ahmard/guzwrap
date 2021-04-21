@@ -17,6 +17,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Promise\PromisorInterface;
+use JsonException;
 use JsonSerializable;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -357,10 +358,11 @@ interface RequestInterface extends JsonSerializable
      * The json option is used to easily upload JSON encoded data as the body of a request.
      * A Content-Type header of application/json will be added if no Content-Type header is already present on the message.
      * @link https://docs.guzzlephp.org/en/stable/request-options.html#json
-     * @param string $json
+     * @param string|array|object $json
+     * @throws JsonException
      * @return $this
      */
-    public function json(string $json): RequestInterface;
+    public function json($json): RequestInterface;
 
     /**
      * Sets the body of the request to a multipart/form-data form.
