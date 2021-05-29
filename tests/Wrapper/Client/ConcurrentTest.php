@@ -11,7 +11,7 @@ class ConcurrentTest extends TestCase
 {
     public function testMethods(): void
     {
-        $promise = Request::get('http:/localhost:8002')->execAsync();
+        $promise = Request::get('http://localhost:8002')->execAsync();
         $concurrent = new Concurrent([$promise]);
 
         self::assertIsArray($concurrent->unwrap());
