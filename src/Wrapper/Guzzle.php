@@ -450,10 +450,6 @@ class Guzzle implements RequestInterface
      */
     public function json($json): Guzzle
     {
-        if (!is_string($json)) {
-            $json = json_encode($json, JSON_THROW_ON_ERROR);
-        }
-
         return $this->addOption('json', $json);
     }
 

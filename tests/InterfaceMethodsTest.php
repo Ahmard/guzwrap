@@ -90,7 +90,7 @@ class InterfaceMethodsTest extends TestCase
         $request->uri('localhost7');
         $request->referer('localhost6');
         $request->stream(true);
-        $request->json('{key: val}');
+        $request->json(['key' => 'val']);
         $request->body(['data']);
         $request->sink('./sank.txt');
         $request->query('name', 'value');
@@ -147,7 +147,7 @@ class InterfaceMethodsTest extends TestCase
             'type' => 'lib'
         ], $data1['form_params']);
         self::assertTrue($data['stream']);
-        self::assertSame('{key: val}', $data['json']);
+        self::assertSame(['key' => 'val'], $data['json']);
         self::assertSame(['data'], $data['body']);
         self::assertSame('./sank.txt', $data['sink']);
         self::assertSame([
