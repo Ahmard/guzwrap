@@ -5,9 +5,9 @@
     "license": "MIT",
     "keywords": ["guzzle", "guzzlehttp", "curl", "http", "client"],
     "require": {
-        "php": ">=7.4",
+        "php": "^8.1",
         "ext-json": "*",
-        "guzzlehttp/guzzle": "^7.2"
+        "guzzlehttp/guzzle": "^7.5"
     },
     "autoload": {
         "psr-4": {
@@ -15,7 +15,7 @@
         }
     },
     "require-dev": {
-        "phpstan/phpstan": "^0.12.64",
+        "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^9.5"
     },
     "autoload-dev": {

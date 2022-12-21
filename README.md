@@ -428,4 +428,16 @@ $client = Client::create()
     ->withCookie()
     ->boom();
 ```
+
+## Testing
+Rust PHP built-in server before running the test
+```
+php -S localhost:8002 -t tests/raw/
+```
+
+Run the test
+```
+composer test
+```
+
 **Enjoy 😎**
